@@ -17,7 +17,8 @@ import {
   Trash2,
   Lock,
   Eye,
-  EyeOff
+  EyeOff,
+  Search
 } from 'lucide-react'
 
 type Tab = 'weekly' | 'mental'
@@ -46,6 +47,14 @@ interface MentalEntry {
 export default function Home() {
   const [activeTab, setActiveTab] = useState<Tab>('weekly')
   
+  // Reset state when switching tabs
+  const switchTab = (tab: Tab) => {
+    setActiveTab(tab)
+    setSearchQuery('')
+    setWeeklyPage(1)
+    setMentalPage(1)
+  }
+  
   // Weekly state
   const [weeklyEntries, setWeeklyEntries] = useState<WeeklyEntry[]>([])
   const [currentHighlight, setCurrentHighlight] = useState('')
@@ -64,6 +73,10 @@ export default function Home() {
   const [currentCoping, setCurrentCoping] = useState('')
   const [showMentalSuccess, setShowMentalSuccess] = useState(false)
   const [showPrivateWarning, setShowPrivateWarning] = useState(true)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [weeklyPage, setWeeklyPage] = useState(1)
+  const [mentalPage, setMentalPage] = useState(1)
+  const ENTRIES_PER_PAGE = 10
   
   // Load from localStorage
   useEffect(() => {
@@ -204,7 +217,7 @@ export default function Home() {
       <div className="max-w-2xl mx-auto px-4 mb-6">
         <div className="flex gap-2 p-1 bg-slate-100 rounded-xl">
           <button
-            onClick={() => setActiveTab('weekly')}
+            onClick={() => switchTab('weekly')}
             className={`flex-1 py-3 px-4 rounded-lg font-medium text-sm transition-all ${
               activeTab === 'weekly' 
                 ? 'bg-white text-mind-700 shadow-sm' 
@@ -217,7 +230,7 @@ export default function Home() {
             </div>
           </button>
           <button
-            onClick={() => setActiveTab('mental')}
+            onClick={() => switchTab('mental')}
             className={`flex-1 py-3 px-4 rounded-lg font-medium text-sm transition-all ${
               activeTab === 'mental' 
                 ? 'bg-white text-purple-700 shadow-sm' 
@@ -373,36 +386,94 @@ export default function Home() {
           {weeklyEntries.length > 0 && (
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
               <h3 className="font-semibold text-slate-800 mb-4">Past Weeks</h3>
-              <div className="space-y-4">
-                {weeklyEntries.slice(0, 10).map((entry) => (
-                  <div key={entry.id} className="p-4 bg-slate-50 rounded-xl relative group">
-                    <div className="flex items-start justify-between gap-4 mb-2">
-                      <span className="text-xs font-medium text-mind-600 bg-mind-100 px-2 py-1 rounded-lg">
-                        {entry.weekNumber} • {formatDate(entry.date)}
-                      </span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg">{getMoodEmoji(entry.mood)}</span>
-                        <button 
-                          onClick={() => deleteEntry(entry.id, 'weekly')}
-                          className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 transition-all"
+              {/* Search */}
+              <div className="mb-4 relative">
+                <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search your entries..."
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value)
+                    setWeeklyPage(1)
+                  }}
+                  className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-mind-400 focus:bg-white"
+                />
+              </div>
+              
+              {/* Filtered and paginated entries */}
+              {(() => {
+                const filtered = weeklyEntries.filter(e => 
+                  !searchQuery || 
+                  e.highlight.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                  e.gratitude.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                  e.challenge.toLowerCase().includes(searchQuery.toLowerCase())
+                )
+                const totalPages = Math.ceil(filtered.length / ENTRIES_PER_PAGE)
+                const paginated = filtered.slice((weeklyPage - 1) * ENTRIES_PER_PAGE, weeklyPage * ENTRIES_PER_PAGE)
+                
+                if (filtered.length === 0) {
+                  return <p className="text-center text-slate-400 py-4">No entries found</p>
+                }
+                
+                return (
+                  <>
+                    <div className="space-y-4">
+                      {paginated.map((entry) => (
+                        <div key={entry.id} className="p-4 bg-slate-50 rounded-xl relative group">
+                          <div className="flex items-start justify-between gap-4 mb-2">
+                            <span className="text-xs font-medium text-mind-600 bg-mind-100 px-2 py-1 rounded-lg">
+                              {entry.weekNumber} • {formatDate(entry.date)}
+                            </span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-lg">{getMoodEmoji(entry.mood)}</span>
+                              <button 
+                                onClick={() => deleteEntry(entry.id, 'weekly')}
+                                className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 transition-all"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                          {entry.highlight && (
+                            <p className="text-sm text-slate-700 mb-1">
+                              <span className="font-medium text-mind-700">Highlight:</span> {entry.highlight}
+                            </p>
+                          )}
+                          {entry.gratitude && (
+                            <p className="text-sm text-slate-600">
+                              <span className="font-medium text-green-700">Grateful:</span> {entry.gratitude}
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {/* Pagination */}
+                    {totalPages > 1 && (
+                      <div className="flex items-center justify-center gap-2 mt-6">
+                        <button
+                          onClick={() => setWeeklyPage(p => Math.max(1, p - 1))}
+                          disabled={weeklyPage === 1}
+                          className="px-3 py-1 bg-slate-100 rounded-lg disabled:opacity-50 text-sm"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          Previous
+                        </button>
+                        <span className="text-sm text-slate-500">
+                          Page {weeklyPage} of {totalPages}
+                        </span>
+                        <button
+                          onClick={() => setWeeklyPage(p => Math.min(totalPages, p + 1))}
+                          disabled={weeklyPage === totalPages}
+                          className="px-3 py-1 bg-slate-100 rounded-lg disabled:opacity-50 text-sm"
+                        >
+                          Next
                         </button>
                       </div>
-                    </div>
-                    {entry.highlight && (
-                      <p className="text-sm text-slate-700 mb-1">
-                        <span className="font-medium text-mind-700">Highlight:</span> {entry.highlight}
-                      </p>
                     )}
-                    {entry.gratitude && (
-                      <p className="text-sm text-slate-600">
-                        <span className="font-medium text-green-700">Grateful:</span> {entry.gratitude}
-                      </p>
-                    )}
-                  </div>
-                ))}
-              </div>
+                  </>
+                )
+              })()}
             </div>
           )}
         </div>
@@ -607,46 +678,102 @@ export default function Home() {
             </div>
           )}
           
+          {/* Search */}
+          <div className="mb-4 relative">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search your entries..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value)
+                setMentalPage(1)
+              }}
+              className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-purple-400 focus:bg-white"
+            />
+          </div>
+          
           {/* History */}
-          {mentalEntries.length > 0 && (
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-              <h3 className="font-semibold text-slate-800 mb-4">Your Entries</h3>
-              <div className="space-y-4">
-                {mentalEntries.slice(0, 10).map((entry) => (
-                  <div key={entry.id} className="p-4 bg-slate-50 rounded-xl relative group">
-                    <div className="flex items-start justify-between gap-4 mb-3">
-                      <span className="text-xs text-slate-400">{formatDate(entry.date)}</span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg">{getMoodEmoji(entry.mood)}</span>
-                        <button 
-                          onClick={() => deleteEntry(entry.id, 'mental')}
-                          className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 transition-all"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+          {mentalEntries.length > 0 && (() => {
+            const filtered = mentalEntries.filter(e => 
+              !searchQuery || 
+              e.thoughts.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              e.triggers.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              e.coping.toLowerCase().includes(searchQuery.toLowerCase())
+            )
+            const totalPages = Math.ceil(filtered.length / ENTRIES_PER_PAGE)
+            const paginated = filtered.slice((mentalPage - 1) * ENTRIES_PER_PAGE, mentalPage * ENTRIES_PER_PAGE)
+            
+            if (filtered.length === 0) {
+              return <p className="text-center text-slate-400 py-4">No entries found</p>
+            }
+            
+            return (
+              <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold text-slate-800">Your Entries</h3>
+                  <span className="text-sm text-slate-400">{filtered.length} entries</span>
+                </div>
+                <div className="space-y-4">
+                  {paginated.map((entry) => (
+                    <div key={entry.id} className="p-4 bg-slate-50 rounded-xl relative group">
+                      <div className="flex items-start justify-between gap-4 mb-3">
+                        <span className="text-xs text-slate-400">{formatDate(entry.date)}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg">{getMoodEmoji(entry.mood)}</span>
+                          <button 
+                            onClick={() => deleteEntry(entry.id, 'mental')}
+                            className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 transition-all"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
+                      <div className="flex gap-4 mb-2 text-xs">
+                        <span className={entry.anxiety >= 4 ? 'text-red-600' : entry.anxiety >= 3 ? 'text-amber-600' : 'text-green-600'}>
+                          Anxiety: {entry.anxiety}/5
+                        </span>
+                        <span className={entry.energy >= 4 ? 'text-blue-600' : entry.energy >= 3 ? 'text-sky-600' : 'text-slate-500'}>
+                          Energy: {entry.energy}/5
+                        </span>
+                      </div>
+                      {entry.thoughts && (
+                        <p className="text-sm text-slate-700 mb-1">{entry.thoughts}</p>
+                      )}
+                      {entry.coping && (
+                        <p className="text-sm text-purple-600">
+                          <span className="font-medium">Helps:</span> {entry.coping}
+                        </p>
+                      )}
                     </div>
-                    <div className="flex gap-4 mb-2 text-xs">
-                      <span className={entry.anxiety >= 4 ? 'text-red-600' : entry.anxiety >= 3 ? 'text-amber-600' : 'text-green-600'}>
-                        Anxiety: {entry.anxiety}/5
-                      </span>
-                      <span className={entry.energy >= 4 ? 'text-blue-600' : entry.energy >= 3 ? 'text-sky-600' : 'text-slate-500'}>
-                        Energy: {entry.energy}/5
-                      </span>
-                    </div>
-                    {entry.thoughts && (
-                      <p className="text-sm text-slate-700 mb-1">{entry.thoughts}</p>
-                    )}
-                    {entry.coping && (
-                      <p className="text-sm text-purple-600">
-                        <span className="font-medium">Helps:</span> {entry.coping}
-                      </p>
-                    )}
+                  ))}
+                </div>
+                
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-center gap-2 mt-6">
+                    <button
+                      onClick={() => setMentalPage(p => Math.max(1, p - 1))}
+                      disabled={mentalPage === 1}
+                      className="px-3 py-1 bg-slate-100 rounded-lg disabled:opacity-50 text-sm"
+                    >
+                      Previous
+                    </button>
+                    <span className="text-sm text-slate-500">
+                      Page {mentalPage} of {totalPages}
+                    </span>
+                    <button
+                      onClick={() => setMentalPage(p => Math.min(totalPages, p + 1))}
+                      disabled={mentalPage === totalPages}
+                      className="px-3 py-1 bg-slate-100 rounded-lg disabled:opacity-50 text-sm"
+                    >
+                      Next
+                    </button>
                   </div>
-                ))}
+                )}
               </div>
-            </div>
-          )}
+            )
+          })()}
         </div>
       )}
       
