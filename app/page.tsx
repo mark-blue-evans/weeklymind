@@ -6,6 +6,7 @@ import {
   Brain,
   ChevronDown,
   Download,
+  FileDown,
   Circle,
   CircleDot,
   ChevronLeft,
@@ -104,6 +105,7 @@ export default function Home() {
   const [currentTriggers, setCurrentTriggers] = useState('')
   const [currentCoping, setCurrentCoping] = useState('')
   const [showMentalSuccess, setShowMentalSuccess] = useState(false)
+  const [showExportMenu, setShowExportMenu] = useState(false)
   const [expandedMentalId, setExpandedMentalId] = useState<string | null>(null)
   
   // Load from localStorage
@@ -195,7 +197,42 @@ export default function Home() {
     }
   }
   
-  const exportData = () => {
+  const exportData = (format: 'json' | 'pdf' = 'json') => {
+    if (format === 'pdf' && typeof window !== 'undefined') {
+      // Simple text-based PDF export
+      let content = 'WEEKLYMIND - Your Wellness Journey\n'
+      content += 'Exported: ' + new Date().toLocaleDateString() + '\n\n'
+      
+      content += '=== WEEKLY CHECK-INS ===\n\n'
+      weeklyEntries.slice(0, 10).forEach((entry) => {
+        content += `Week: ${entry.weekNumber}\n`
+        content += `Date: ${entry.date.split('T')[0]}\n`
+        content += `Highlight: ${entry.highlight || '-'}\n`
+        content += `Challenge: ${entry.challenge || '-'}\n`
+        content += `Gratitude: ${entry.gratitude || '-'}\n`
+        content += `Mood: ${entry.mood >= 3 ? 'Positive' : entry.mood >= 2 ? 'Neutral' : 'Difficult'}\n`
+        content += '\n'
+      })
+      
+      content += '\n=== MENTAL WELLNESS CHECK-INS ===\n\n'
+      mentalEntries.slice(0, 10).forEach((entry) => {
+        content += `Date: ${entry.date.split('T')[0]}\n`
+        content += `Mood: ${entry.mood >= 3 ? 'Good' : entry.mood >= 2 ? 'Okay' : 'Tough'}\n`
+        content += `Anxiety: ${entry.anxiety >= 3 ? 'High' : entry.anxiety >= 2 ? 'Moderate' : 'Low'}\n`
+        content += `Energy: ${entry.energy >= 3 ? 'High' : entry.energy >= 2 ? 'Moderate' : 'Low'}\n`
+        content += '\n'
+      })
+      
+      const blob = new Blob([content], { type: 'text/plain' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = 'weeklymind-export.txt'
+      link.click()
+      return
+    }
+    
+    // Default JSON export
     const data = {
       weekly: weeklyEntries,
       mental: mentalEntries,
@@ -710,13 +747,33 @@ export default function Home() {
           <p className="text-[12px] text-[#b0b0b5]">
             WeeklyMind © 2026
           </p>
-          <button 
-            onClick={exportData}
-            className="text-[12px] text-[#86868b] hover:text-[#1d1d1d] flex items-center gap-1.5 px-3 py-1.5 rounded-full hover:bg-[#e8e8ed] transition-all"
-          >
-            <Download size={14} />
-            Export
-          </button>
+          <div className="relative">
+            <button 
+              onClick={() => setShowExportMenu(!showExportMenu)}
+              className="text-[12px] text-[#86868b] hover:text-[#1d1d1d] flex items-center gap-1.5 px-3 py-1.5 rounded-full hover:bg-[#e8e8ed] transition-all"
+            >
+              <Download size={14} />
+              Export
+            </button>
+            {showExportMenu && (
+              <div className="absolute bottom-full right-0 mb-1 bg-white rounded-lg shadow-lg border border-[#e5e5e7] py-1 min-w-[120px] animate-scaleIn z-50">
+                <button 
+                  onClick={() => { exportData('json'); setShowExportMenu(false); }}
+                  className="w-full px-4 py-2 text-left text-[13px] hover:bg-[#f5f5f5] transition-colors flex items-center gap-2"
+                >
+                  <FileDown size={14} />
+                  JSON (Data)
+                </button>
+                <button 
+                  onClick={() => { exportData('pdf'); setShowExportMenu(false); }}
+                  className="w-full px-4 py-2 text-left text-[13px] hover:bg-[#f5f5f5] transition-colors flex items-center gap-2"
+                >
+                  <FileDown size={14} />
+                  Text (Summary)
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </footer>
     </div>

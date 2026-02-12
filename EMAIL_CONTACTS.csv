@@ -1,4 +1,5 @@
 Contact Name,Organization,Role,Email,Source,Outreach Type,Status
+--- Round 1 (SENT) ---
 Joy Harden Bradford,Therapy for Black Girls,Host,info@therapyforblackgirls.com,Podcast Feedspot,Podcast Guest,SENT
 Dr. John Delony,The Dr. John Delony Show,Host,questions@ramseysolutions.com,Podcast Feedspot,Podcast Guest,SENT
 Dan Harris,Ten Percent Happier,Host,guests@tenpercenthappier.com,Podcast Feedspot,Podcast Guest,SENT
@@ -6,24 +7,73 @@ Dan Harris,Ten Percent Happier,Host,guests@tenpercenthappier.com,Podcast Feedspo
 ,Modern Health,Sales,hello@modernhealth.com,Company Website,B2B Partnership,SENT
 ,Mental Health America,,hello@mhanational.org,Organization Website,Partnership,SENT
 ,Headspace Health,B2B,partners@headspace.com,Company Website,B2B Partnership,SENT
---- Round 2 (Pending) ---
-Drew Linsalata,The Anxious Truth,Host,****@theanxioustruth.com,Podcast Feedspot,Podcast Guest,PENDING
-Mick Coyle,Mental Health Radio,Host,****@bauermedia.co.uk,Podcast Feedspot,Podcast Guest,PENDING
-,Calm Business,Sales,hello@calm.com,Company Website,B2B Partnership,PENDING
-,Ginger,Sales,sales@ginger.io,Company Website,B2B Partnership,PENDING
-,Unmind,Sales,hello@unmind.com,Company Website,B2B Partnership,PENDING
-,Lyra Health,Sales,hello@lyrahealth.com,Company Website,B2B Partnership,PENDING
-,Wellable,Sales,hello@wellable.co,Company Website,B2B Partnership,PENDING
-,BetterUp,B2B,sales@betterup.com,Company Website,B2B Partnership,PENDING
-,Happily,Corporate Wellness,hello@happily.com,Company Website,B2B Partnership,PENDING
-,Virgin Pulse,Sales,info@virginpulse.com,Company Website,B2B Partnership,PENDING
-,Welldoc,Sales,hello@welldoc.com,Company Website,B2B Partnership,PENDING
-,Doctor On Demand,Sales,partnerships@doctorondemand.com,Company Website,B2B Partnership,PENDING
-,Mindbody,Sales,sales@mindbody.io,Company Website,B2B Partnership,PENDING
-,Classpass,Sales,enterprise@classpass.com,Company Website,B2B Partnership,PENDING
-,Oasis (Students),University Wellness,hello@oasis.com,Company Website,University Partnership,PENDING
-,NAMI,,info@nami.org,Organization Website,Partnership,PENDING
-,ADAA,,professional@adaa.org,Organization Website,Partnership,PENDING
-,Psychology Today,,therapistrelations@psychologytoday.com,Organization Website,Partnership,PENDING
-,Psych Central,,editors@psychcentral.com,Organization Website,Partnership,PENDING
-,Everyday Health,,partnerships@everydayhealth.com,Company Website,Partnership,PENDING
+--- Round 2 (SENT) ---
+Drew Linsalata,The Anxious Truth,Host,hello@theanxioustruth.com,Podcast Feedspot,Podcast Guest,SENT
+Mick Coyle,Mental Health Radio,Host,hello@bauermedia.co.uk,Podcast Feedspot,Podcast Guest,SENT
+,Calm Business,Sales,hello@calm.com,Company Website,B2B Partnership,SENT
+,Ginger,Sales,sales@ginger.io,Company Website,B2B Partnership,SENT
+,Unmind,Sales,hello@unmind.com,Company Website,B2B Partnership,SENT
+,Lyra Health,Sales,hello@lyrahealth.com,Company Website,B2B Partnership,SENT
+,Wellable,Sales,hello@wellable.co,Company Website,B2B Partnership,SENT
+,BetterUp,B2B,sales@betterup.com,Company Website,B2B Partnership,SENT
+,Happily,Corporate Wellness,hello@happily.com,Company Website,B2B Partnership,SENT
+,Virgin Pulse,Sales,info@virginpulse.com,Company Website,B2B Partnership,SENT
+,Welldoc,Sales,hello@welldoc.com,Company Website,B2B Partnership,SENT
+,Doctor On Demand,Sales,partnerships@doctorondemand.com,Company Website,B2B Partnership,SENT
+,Mindbody,Sales,sales@mindbody.io,Company Website,B2B Partnership,SENT
+,Classpass,Sales,enterprise@classpass.com,Company Website,B2B Partnership,SENT
+,Oasis (Students),University Wellness,hello@oasis.com,Company Website,University Partnership,SENT
+,NAMI,,info@nami.org,Organization Website,Partnership,SENT
+,ADAA,,professional@adaa.org,Organization Website,Partnership,SENT
+,Psychology Today,,therapistrelations@psychologytoday.com,Organization Website,Partnership,SENT
+,Psych Central,,editors@psychcentral.com,Organization Website,Partnership,SENT
+,Everyday Health,,partnerships@everydayhealth.com,Company Website,Partnership,SENT
+--- Round 3 (PENDING - 57 contacts) ---
+,Kanjo,Female Founders,sophia@kanjo.com,Web Search,Startup Outreach,PENDING
+,Alena,Founder,founders@alena.app,Web Search,Startup Outreach,PENDING
+,Mightier,Founders,ed@mightier.com,Web Search,Startup Outreach,PENDING
+,NUE Life,Founder,hello@nuelife.com,Web Search,Startup Outreach,PENDING
+,Amaha,Founder,dr@amaha.health,Web Search,Startup Outreach,PENDING
+,Meditation Mind Podcast,Host,****@meditationmind.org,Podcast Feedspot,Podcast Guest,PENDING
+,Mindfulness Exercises,Host,info@mindfulnessexercises.com,Podcast Feedspot,Podcast Guest,PENDING
+,Mindful in Minutes,Host,info@yogaforyouonline.com,Apple Podcast,Podcast Guest,PENDING
+,Mindfulness for Beginners,Host,shaunmindfulness@gmail.com,Apple Podcast,Podcast Guest,PENDING
+,Deconstructing Yourself,Host,hello@deconstructingyourself.com,Reddit,Podcast Guest,PENDING
+,Be Calm Be Happy,Host,shaunmindfulness@gmail.com,Web Search,Podcast Guest,PENDING
+,Anthem EAP,Sales,eapsalesapp@anthem.com,Web Search,B2B Partnership,PENDING
+,Curalinc (Penn EAP),Support,support@curalinc.com,Web Search,B2B Partnership,PENDING
+,DHS EAP,Government,worklife@hq.dhs.gov,Web Search,B2B Partnership,PENDING
+,Commerce Dept EAP,Government,FOH@commerce.gov,Web Search,B2B Partnership,PENDING
+,Ohio State EAP,University,eap@osumc.edu,Web Search,University Partnership,PENDING
+,Penn EAP,University,support@curalinc.com,Web Search,University Partnership,PENDING
+,Mindful.org,Editorial,editorial@mindful.org,Web Search,Content Partnership,PENDING
+,Yoga Chaitanya,Guest Post,email@yogachaitanya.com,Web Search,Content Partnership,PENDING
+,Daily Cup of Yoga,Guest Post,submit@dailycupofyoga.com,Web Search,Content Partnership,PENDING
+,Moved To Meditate,Podcast,hello@movedtomeditate.com,Web Search,Podcast Guest,PENDING
+,Mindful Movement Podcast,Host,hello@movedtomeditate.com,Web Search,Podcast Guest,PENDING
+,One Mind Accelerator,Program,hello@onemind.org,Web Search,Partnership,PENDING
+,Jed Foundation,Student Wellness,hello@jedfoundation.org,Web Search,University Partnership,PENDING
+,Active Minds,Student Wellness,info@activeminds.org,Web Search,University Partnership,PENDING
+,ULifeline,Student Wellness,info@ulifeline.org,Web Search,University Partnership,PENDING
+,The Hope Center,Student Wellness,hello@hopecenter.edu,Web Search,University Partnership,PENDING
+,Bright Horizons,Family Solutions,hello@brighthorizons.com,Web Search,B2B Partnership,PENDING
+,LifeWorks (Morneau Shepell),Wellness,info@lifeworks.com,Web Search,B2B Partnership,PENDING
+,ComPsych,Wellness,sales@compsych.com,Web Search,B2B Partnership,PENDING
+,Strategic Benefits Advisors,Benefits,info@sba-inc.com,Web Search,B2B Partnership,PENDING
+,Acentra Health,EAP,info@acentrahealth.com,Web Search,B2B Partnership,PENDING
+,Espyr,EAP,hello@espyr.com,Web Search,B2B Partnership,PENDING
+,James Clear (Atomic Habits),Author,team@jamesclear.com,Web Search,Influencer Outreach,PENDING
+,Tony Robbins,Motivation,hello@tonyrobbins.com,Web Search,Influencer Outreach,PENDING
+,Tim Ferriss Show,Podcast,guests@tim.blog,Web Search,Podcast Guest,PENDING
+,The Knowledge Project,Podcast,hello@fs.blog,Web Search,Podcast Guest,PENDING
+,Huberman Lab,Podcast,team@hubermanlab.com,Web Search,Podcast Guest,PENDING
+,The Mindful Minute,Podcast,hello@mindfulminute.com,Web Search,Podcast Guest,PENDING
+,Product Hunt,Launch Platform,team@producthunt.com,Web Search,Launch Partnership,PENDING
+,Y Combinator,Startup,partners@ycombinator.com,Web Search,Startup Community,PENDING
+,TECHCrunch,Media,events@techcrunch.com,Web Search,Media Outreach,PENDING
+,Indie Hackers,Community,founders@indiehackers.com,Web Search,Community Outreach,PENDING
+,Betalist,Startup,hello@betalist.com,Web Search,Startup Community,PENDING
+,Breathwork+,App Team,hello@breathworkplus.com,Web Search,App Partnership,PENDING
+,Insight Timer,Meditation Team,team@insighttimer.com,Web Search,App Partnership,PENDING
+,Calm Body,Fitness,hello@calmbody.app,Web Search,App Partnership,PENDING
+,Simple Habit,Meditation,hello@simplehabit.com,Web Search,App Partnership,PENDING
