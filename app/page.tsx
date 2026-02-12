@@ -2,23 +2,16 @@
 
 import { useState, useEffect } from 'react'
 import { 
-  Calendar, 
-  Heart, 
-  Brain, 
-  ChevronRight, 
+  Calendar,
+  Brain,
+  ChevronRight,
   CheckCircle2,
-  Smile,
-  Meh,
-  Frown,
-  Sparkles,
-  Clock,
-  TrendingUp,
   Download,
-  Trash2,
   Lock,
-  Eye,
-  EyeOff,
-  Search
+  ArrowRight,
+  Sparkles,
+  Heart,
+  ChevronDown
 } from 'lucide-react'
 
 type Tab = 'weekly' | 'mental'
@@ -46,13 +39,12 @@ interface MentalEntry {
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<Tab>('weekly')
+  const [searchQuery, setSearchQuery] = useState('')
   
   // Reset state when switching tabs
   const switchTab = (tab: Tab) => {
     setActiveTab(tab)
     setSearchQuery('')
-    setWeeklyPage(1)
-    setMentalPage(1)
   }
   
   // Weekly state
@@ -62,8 +54,7 @@ export default function Home() {
   const [currentGratitude, setCurrentGratitude] = useState('')
   const [currentMood, setCurrentMood] = useState(3)
   const [showWeeklySuccess, setShowWeeklySuccess] = useState(false)
-  
-  const [expandedMentalId, setExpandedMentalId] = useState<string | null>(null)
+  const [expandedEntryId, setExpandedEntryId] = useState<string | null>(null)
   
   // Mental wellness state
   const [mentalEntries, setMentalEntries] = useState<MentalEntry[]>([])
@@ -74,52 +65,7 @@ export default function Home() {
   const [currentTriggers, setCurrentTriggers] = useState('')
   const [currentCoping, setCurrentCoping] = useState('')
   const [showMentalSuccess, setShowMentalSuccess] = useState(false)
-  const [showPrivateWarning, setShowPrivateWarning] = useState(true)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [weeklyPage, setWeeklyPage] = useState(1)
-  const [mentalPage, setMentalPage] = useState(1)
-  const ENTRIES_PER_PAGE = 10
-  
-  const [expandedEntryId, setExpandedEntryId] = useState<string | null>(null)
-  
-  // Calculate streak (consecutive entries)
-  const calculateStreak = () => {
-    if (weeklyEntries.length === 0) return 0
-    
-    let streak = 1
-    const sorted = [...weeklyEntries].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    
-    for (let i = 0; i < sorted.length - 1; i++) {
-      const current = new Date(sorted[i].date)
-      const next = new Date(sorted[i + 1].date)
-      const diffDays = Math.floor((current.getTime() - next.getTime()) / (1000 * 60 * 60 * 24))
-      
-      if (diffDays <= 14) {
-        streak++
-      } else {
-        break
-      }
-    }
-    
-    return streak
-  }
-  
-  const streak = calculateStreak()
-  
-  // Simple trend data (last 12 entries)
-  const getTrendData = () => {
-    const sorted = [...weeklyEntries]
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-      .slice(-12)
-    
-    return sorted.map((e, i) => ({
-      week: i + 1,
-      mood: e.mood,
-      date: formatDate(e.date)
-    }))
-  }
-  
-  const trendData = getTrendData()
+  const [expandedMentalId, setExpandedMentalId] = useState<string | null>(null)
   
   // Load from localStorage
   useEffect(() => {
@@ -150,7 +96,7 @@ export default function Home() {
   
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr)
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })
   }
   
   const saveWeeklyEntry = () => {
@@ -229,185 +175,124 @@ export default function Home() {
     link.download = 'weeklymind-data.json'
     link.click()
   }
-  
+
+  const filteredWeekly = weeklyEntries.filter(e => 
+    !searchQuery || 
+    e.highlight.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    e.gratitude.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
+  const filteredMental = mentalEntries.filter(e => 
+    !searchQuery || 
+    e.thoughts.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
   return (
-    <main className="min-h-screen pb-12">
-      {/* Private Warning */}
-      {showPrivateWarning && (
-        <div className="bg-mind-100 border-b border-mind-200 px-4 py-3 animate-slideIn">
-          <div className="max-w-2xl mx-auto flex items-center justify-between gap-4">
-            <div className="flex items-center gap-2 text-mind-800">
-              <Lock className="w-4 h-4" />
-              <span className="text-sm">Your data stays on this device. Nothing is tracked or stored anywhere else.</span>
-            </div>
-            <button 
-              onClick={() => setShowPrivateWarning(false)}
-              className="text-mind-600 hover:text-mind-800"
-            >
-              <EyeOff className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      )}
-      
-      {/* Header */}
-      <header className="max-w-2xl mx-auto px-4 pt-8 pb-6">
-        <h1 className="text-3xl font-bold text-slate-800 mb-2">WeeklyMind</h1>
-        <p className="text-slate-500">Private mental wellness check-ins</p>
+    <div className="min-h-screen bg-[#f5f5f7]">
+      {/* Header - Apple Style */}
+      <header className="pt-16 pb-8 px-6 max-w-2xl mx-auto">
+        <h1 className="text-[48px] font-semibold tracking-tight text-[#1d1d1f] mb-2">
+          WeeklyMind
+        </h1>
+        <p className="text-[21px] font-normal text-[#86868b]">
+          Private mental wellness check-ins
+        </p>
       </header>
       
-      {/* Tabs */}
-      <div className="max-w-2xl mx-auto px-4 mb-6">
-        <div className="flex gap-2 p-1 bg-slate-100 rounded-xl">
+      {/* Tabs - Minimal Apple Style */}
+      <div className="max-w-2xl mx-auto px-6 mb-12">
+        <div className="flex gap-1 bg-[#e8e8ed] p-1 rounded-[18px] w-fit">
           <button
             onClick={() => switchTab('weekly')}
-            className={`flex-1 py-3 px-4 rounded-lg font-medium text-sm transition-all ${
+            className={`px-6 py-2.5 rounded-[14px] text-[15px] font-medium transition-all duration-300 ${
               activeTab === 'weekly' 
-                ? 'bg-white text-mind-700 shadow-sm' 
-                : 'text-slate-500 hover:text-slate-700'
+                ? 'bg-white text-[#1d1d1f] shadow-sm' 
+                : 'text-[#86868b] hover:text-[#1d1d1f]'
             }`}
           >
-            <div className="flex items-center justify-center gap-2">
-              <Calendar className="w-4 h-4" />
-              Weekly Recap
-            </div>
+            Weekly
           </button>
           <button
             onClick={() => switchTab('mental')}
-            className={`flex-1 py-3 px-4 rounded-lg font-medium text-sm transition-all ${
+            className={`px-6 py-2.5 rounded-[14px] text-[15px] font-medium transition-all duration-300 ${
               activeTab === 'mental' 
-                ? 'bg-white text-purple-700 shadow-sm' 
-                : 'text-slate-500 hover:text-slate-700'
+                ? 'bg-white text-[#1d1d1f] shadow-sm' 
+                : 'text-[#86868b] hover:text-[#1d1d1f]'
             }`}
           >
-            <div className="flex items-center justify-center gap-2">
-              <Brain className="w-4 h-4" />
-              Mental Wellness
-            </div>
+            Wellness
           </button>
         </div>
       </div>
       
       {/* Weekly Tab */}
       {activeTab === 'weekly' && (
-        <div className="max-w-2xl mx-auto px-4 space-y-6 animate-fadeIn">
-          {/* Intro */}
-          <div className="bg-gradient-to-r from-mind-50 to-green-50 rounded-2xl p-6 border border-mind-100">
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-mind-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                <Clock className="w-6 h-6 text-mind-600" />
+        <main className="max-w-2xl mx-auto px-6 pb-20 animate-fadeIn">
+          {/* Intro Card */}
+          <div className="bg-white rounded-[18px] p-8 mb-6">
+            <div className="flex items-start gap-6">
+              <div className="w-16 h-16 bg-[#f5f5f7] rounded-[16px] flex items-center justify-center flex-shrink-0">
+                <Calendar className="w-8 h-8 text-[#86868b]" />
               </div>
-              <div>
-                <h2 className="font-semibold text-slate-800 mb-1">Weekly Check-in</h2>
-                <p className="text-sm text-slate-600">
+              <div className="flex-1">
+                <h2 className="text-[24px] font-semibold text-[#1d1d1f] mb-2">
+                  Weekly Check-in
+                </h2>
+                <p className="text-[17px] font-normal text-[#86868b] leading-relaxed">
                   Reflect on your week. Three simple questions — no pressure, no judgment.
                 </p>
               </div>
             </div>
           </div>
           
-          {/* Stats */}
-          {weeklyEntries.length > 0 && (
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-slate-800 flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5 text-mind-500" />
-                  Your Journey
-                </h3>
-                <span className="text-sm text-slate-400">{weeklyEntries.length} entries</span>
-              </div>
-              <div className="grid grid-cols-4 gap-4">
-                <div className="text-center p-4 bg-slate-50 rounded-xl">
-                  <p className="text-2xl font-bold text-mind-600">{weeklyEntries.length}</p>
-                  <p className="text-xs text-slate-500">Weeks Tracked</p>
-                </div>
-                <div className="text-center p-4 bg-slate-50 rounded-xl">
-                  <p className="text-2xl font-bold text-slate-600">
-                    {Math.round(weeklyEntries.reduce((acc, e) => acc + e.mood, 0) / weeklyEntries.length * 10) / 10}
-                  </p>
-                  <p className="text-xs text-slate-500">Avg Mood</p>
-                </div>
-                <div className="text-center p-4 bg-slate-50 rounded-xl">
-                  <p className="text-2xl font-bold text-green-600">
-                    {weeklyEntries.filter(e => e.gratitude).length}
-                  </p>
-                  <p className="text-xs text-slate-500">Gratitude Notes</p>
-                </div>
-                <div className="text-center p-4 bg-amber-50 rounded-xl">
-                  <p className="text-2xl font-bold text-amber-600">{streak}</p>
-                  <p className="text-xs text-slate-500">Week Streak</p>
-                </div>
-              </div>
-              
-              {/* Simple Trend Chart */}
-              {trendData.length > 1 && (
-                <div className="mt-4 pt-4 border-t border-slate-100">
-                  <p className="text-xs text-slate-500 mb-2">Mood Trend (Last {trendData.length} weeks)</p>
-                  <div className="h-16 flex items-end gap-1">
-                    {trendData.map((point, i) => (
-                      <div
-                        key={i}
-                        className="flex-1 bg-mind-200 rounded-t"
-                        style={{ height: `${(point.mood / 5) * 100}%` }}
-                        title={`Week ${point.week}: ${point.mood}/5 - ${point.date}`}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-          
-          {/* Add Entry */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-            <h3 className="font-semibold text-slate-800 mb-5">This Week</h3>
-            
-            <div className="space-y-6">
+          {/* Form */}
+          <div className="bg-white rounded-[18px] p-8 mb-6">
+            <div className="space-y-8">
               {/* Question 1 */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+              <div className="group">
+                <label className="block text-[15px] font-medium text-[#1d1d1f] mb-3 transition-colors group-focus-within:text-[#0071e3]">
                   What was your highlight?
                 </label>
                 <textarea
                   placeholder="Something good that happened..."
                   value={currentHighlight}
                   onChange={(e) => setCurrentHighlight(e.target.value)}
-                  rows={2}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-mind-400 focus:bg-white resize-none"
+                  rows={3}
+                  className="w-full px-4 py-3 bg-[#f5f5f7] border border-transparent rounded-[12px] text-[17px] text-[#1d1d1f] placeholder-[#86868b] focus:bg-white focus:border-[#0071e3] focus:outline-none transition-all resize-none"
                 />
               </div>
               
               {/* Question 2 */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+              <div className="group">
+                <label className="block text-[15px] font-medium text-[#1d1d1f] mb-3 transition-colors group-focus-within:text-[#0071e3]">
                   What was challenging?
                 </label>
                 <textarea
                   placeholder="Something that was hard..."
                   value={currentChallenge}
                   onChange={(e) => setCurrentChallenge(e.target.value)}
-                  rows={2}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-mind-400 focus:bg-white resize-none"
+                  rows={3}
+                  className="w-full px-4 py-3 bg-[#f5f5f7] border border-transparent rounded-[12px] text-[17px] text-[#1d1d1f] placeholder-[#86868b] focus:bg-white focus:border-[#0071e3] focus:outline-none transition-all resize-none"
                 />
               </div>
               
               {/* Question 3 */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+              <div className="group">
+                <label className="block text-[15px] font-medium text-[#1d1d1f] mb-3 transition-colors group-focus-within:text-[#0071e3]">
                   What are you grateful for?
                 </label>
                 <textarea
                   placeholder="Something positive to focus on..."
                   value={currentGratitude}
                   onChange={(e) => setCurrentGratitude(e.target.value)}
-                  rows={2}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-mind-400 focus:bg-white resize-none"
+                  rows={3}
+                  className="w-full px-4 py-3 bg-[#f5f5f7] border border-transparent rounded-[12px] text-[17px] text-[#1d1d1f] placeholder-[#86868b] focus:bg-white focus:border-[#0071e3] focus:outline-none transition-all resize-none"
                 />
               </div>
               
               {/* Mood */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-3">
+              <div className="pt-4">
+                <label className="block text-[15px] font-medium text-[#1d1d1f] mb-4 text-center">
                   How was your week overall?
                 </label>
                 <div className="flex items-center justify-center gap-3">
@@ -415,10 +300,10 @@ export default function Home() {
                     <button
                       key={mood}
                       onClick={() => setCurrentMood(mood)}
-                      className={`w-14 h-14 rounded-xl flex items-center justify-center text-2xl transition-all ${
+                      className={`w-16 h-16 rounded-[16px] flex items-center justify-center text-[28px] transition-all duration-300 ${
                         currentMood === mood
-                          ? 'bg-mind-100 ring-2 ring-mind-400 scale-110'
-                          : 'bg-slate-50 hover:bg-slate-100'
+                          ? 'bg-[#f5f5f7] ring-2 ring-[#0071e3] scale-105'
+                          : 'bg-transparent hover:bg-[#f5f5f7]'
                       }`}
                     >
                       {getMoodEmoji(mood)}
@@ -430,7 +315,7 @@ export default function Home() {
               <button
                 onClick={saveWeeklyEntry}
                 disabled={!currentHighlight && !currentChallenge && !currentGratitude}
-                className="w-full py-3 bg-mind-500 text-white rounded-xl font-medium hover:bg-mind-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full py-4 bg-[#0071e3] text-white text-[17px] font-medium rounded-[18px] hover:bg-[#0077ed] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 mt-4"
               >
                 <CheckCircle2 className="w-5 h-5" />
                 Save Entry
@@ -438,212 +323,129 @@ export default function Home() {
             </div>
           </div>
           
-          {/* Success */}
+          {/* Success Message */}
           {showWeeklySuccess && (
-            <div className="bg-mind-100 border border-mind-300 rounded-xl p-4 flex items-center gap-3 animate-fadeIn">
-              <CheckCircle2 className="w-6 h-6 text-mind-600" />
-              <p className="text-mind-700 font-medium">Entry saved! See you next week.</p>
+            <div className="bg-[#d4edda] border border-[#c3e6cb] rounded-[12px] p-4 mb-6 flex items-center gap-3 animate-fadeIn">
+              <CheckCircle2 className="w-5 h-5 text-[#28a745]" />
+              <p className="text-[15px] font-medium text-[#155724]">Entry saved! See you next week.</p>
             </div>
           )}
           
           {/* History */}
           {weeklyEntries.length > 0 && (
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-              <h3 className="font-semibold text-slate-800 mb-4">Past Weeks</h3>
+            <div className="mb-6">
               {/* Search */}
-              <div className="mb-4 relative">
-                <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
+              <div className="relative mb-6">
                 <input
                   type="text"
                   placeholder="Search your entries..."
                   value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value)
-                    setWeeklyPage(1)
-                  }}
-                  className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-mind-400 focus:bg-white"
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full px-4 py-3 pl-12 bg-[#f5f5f7] border border-transparent rounded-[12px] text-[15px] text-[#1d1d1f] placeholder-[#86868b] focus:bg-white focus:border-[#0071e3] focus:outline-none transition-all"
                 />
+                <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
+                  <div className="w-4 h-4 border-2 border-[#86868b] rounded-full" />
+                </div>
               </div>
               
-              {/* Filtered and paginated entries */}
-              {(() => {
-                const filtered = weeklyEntries.filter(e => 
-                  !searchQuery || 
-                  e.highlight.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                  e.gratitude.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                  e.challenge.toLowerCase().includes(searchQuery.toLowerCase())
-                )
-                const totalPages = Math.ceil(filtered.length / ENTRIES_PER_PAGE)
-                const paginated = filtered.slice((weeklyPage - 1) * ENTRIES_PER_PAGE, weeklyPage * ENTRIES_PER_PAGE)
-                
-                if (filtered.length === 0) {
-                  return <p className="text-center text-slate-400 py-4">No entries found</p>
-                }
-                
-                return (
-                  <>
-                    <div className="space-y-4">
-                      {paginated.map((entry) => (
-                        <div 
-                          key={entry.id} 
-                          className={`p-4 rounded-xl relative group cursor-pointer transition-all ${
-                            expandedEntryId === entry.id 
-                              ? 'bg-mind-50 border-2 border-mind-300' 
-                              : 'bg-slate-50 border border-transparent hover:border-mind-200'
-                          }`}
-                          onClick={() => setExpandedEntryId(expandedEntryId === entry.id ? null : entry.id)}
-                        >
-                          <div className="flex items-start justify-between gap-4 mb-2">
-                            <span className="text-xs font-medium text-mind-600 bg-mind-100 px-2 py-1 rounded-lg">
-                              {entry.weekNumber} • {formatDate(entry.date)}
-                            </span>
-                            <div className="flex items-center gap-2">
-                              <span className="text-lg">{getMoodEmoji(entry.mood)}</span>
-                              <button 
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  deleteEntry(entry.id, 'weekly')
-                                }}
-                                className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 transition-all"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </div>
-                          
-                          {/* Preview */}
-                          <div className="text-sm text-slate-700">
-                            {entry.highlight && (
-                              <p className="mb-1">
-                                <span className="font-medium text-mind-700">Highlight:</span> {entry.highlight.length > 60 ? entry.highlight.slice(0, 60) + '...' : entry.highlight}
-                              </p>
-                            )}
-                            {expandedEntryId !== entry.id && entry.gratitude && (
-                              <p className="text-slate-600 text-xs">
-                                + {entry.gratitude.length > 40 ? entry.gratitude.slice(0, 40) + '...' : entry.gratitude}
-                              </p>
-                            )}
-                          </div>
-                          
-                          {/* Expanded View */}
-                          {expandedEntryId === entry.id && (
-                            <div className="mt-4 pt-4 border-t border-mind-200 space-y-3 animate-fadeIn">
-                              {entry.highlight && (
-                                <div>
-                                  <p className="text-xs font-medium text-mind-600 mb-1">HIGHLIGHT</p>
-                                  <p className="text-sm text-slate-700">{entry.highlight}</p>
-                                </div>
-                              )}
-                              {entry.challenge && (
-                                <div>
-                                  <p className="text-xs font-medium text-amber-600 mb-1">CHALLENGING</p>
-                                  <p className="text-sm text-slate-700">{entry.challenge}</p>
-                                </div>
-                              )}
-                              {entry.gratitude && (
-                                <div>
-                                  <p className="text-xs font-medium text-green-600 mb-1">GRATEFUL</p>
-                                  <p className="text-sm text-slate-700">{entry.gratitude}</p>
-                                </div>
-                              )}
-                              <div className="flex items-center gap-2 pt-2">
-                                <span className="text-xs text-slate-400">Mood: {getMoodEmoji(entry.mood)} ({entry.mood}/5)</span>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      ))}
+              <div className="space-y-4">
+                {filteredWeekly.map((entry) => (
+                  <div 
+                    key={entry.id}
+                    className={`bg-white rounded-[16px] p-6 cursor-pointer transition-all duration-300 ${
+                      expandedEntryId === entry.id ? 'ring-2 ring-[#0071e3]' : 'hover:ring-2 hover:ring-[#e8e8ed]'
+                    }`}
+                    onClick={() => setExpandedEntryId(expandedEntryId === entry.id ? null : entry.id)}
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <span className="text-[15px] font-medium text-[#1d1d1f]">{entry.weekNumber}</span>
+                        <span className="text-[14px] text-[#86868b]">{formatDate(entry.date)}</span>
+                      </div>
+                      <span className="text-[24px]">{getMoodEmoji(entry.mood)}</span>
                     </div>
                     
-                    {/* Pagination */}
-                    {totalPages > 1 && (
-                      <div className="flex items-center justify-center gap-2 mt-6">
-                        <button
-                          onClick={() => setWeeklyPage(p => Math.max(1, p - 1))}
-                          disabled={weeklyPage === 1}
-                          className="px-3 py-1 bg-slate-100 rounded-lg disabled:opacity-50 text-sm"
-                        >
-                          Previous
-                        </button>
-                        <span className="text-sm text-slate-500">
-                          Page {weeklyPage} of {totalPages}
-                        </span>
-                        <button
-                          onClick={() => setWeeklyPage(p => Math.min(totalPages, p + 1))}
-                          disabled={weeklyPage === totalPages}
-                          className="px-3 py-1 bg-slate-100 rounded-lg disabled:opacity-50 text-sm"
-                        >
-                          Next
-                        </button>
+                    {entry.highlight && (
+                      <p className="text-[15px] text-[#1d1d1f] line-clamp-2">
+                        <span className="font-medium">Highlight:</span> {entry.highlight}
+                      </p>
+                    )}
+                    
+                    {expandedEntryId === entry.id && (
+                      <div className="mt-4 pt-4 border-t border-[#f5f5f7] space-y-3 animate-fadeIn">
+                        {entry.highlight && (
+                          <div>
+                            <p className="text-[12px] font-semibold text-[#86868b] uppercase tracking-wide mb-1">HIGHLIGHT</p>
+                            <p className="text-[15px] text-[#1d1d1f]">{entry.highlight}</p>
+                          </div>
+                        )}
+                        {entry.challenge && (
+                          <div>
+                            <p className="text-[12px] font-semibold text-[#86868b] uppercase tracking-wide mb-1">CHALLENGING</p>
+                            <p className="text-[15px] text-[#1d1d1f]">{entry.challenge}</p>
+                          </div>
+                        )}
+                        {entry.gratitude && (
+                          <div>
+                            <p className="text-[12px] font-semibold text-[#86868b] uppercase tracking-wide mb-1">GRATEFUL</p>
+                            <p className="text-[15px] text-[#1d1d1f]">{entry.gratitude}</p>
+                          </div>
+                        )}
+                        <div className="flex items-center justify-between pt-2">
+                          <span className="text-[13px] text-[#86868b]">Mood: {getMoodEmoji(entry.mood)} ({entry.mood}/5)</span>
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              deleteEntry(entry.id, 'weekly')
+                            }}
+                            className="text-[13px] text-[#86868b] hover:text-[#ff3b30] transition-colors"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </div>
                     )}
-                  </>
-                )
-              })()}
+                    
+                    {!expandedEntryId && (entry.challenge || entry.gratitude) && (
+                      <div className="mt-2 text-[13px] text-[#86868b] flex items-center gap-1">
+                        <ChevronDown className="w-4 h-4" />
+                        Show more
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           )}
-        </div>
+        </main>
       )}
       
       {/* Mental Wellness Tab */}
       {activeTab === 'mental' && (
-        <div className="max-w-2xl mx-auto px-4 space-y-6 animate-fadeIn">
-          {/* Intro */}
-          <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-100">
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                <Brain className="w-6 h-6 text-purple-600" />
+        <main className="max-w-2xl mx-auto px-6 pb-20 animate-fadeIn">
+          {/* Intro Card */}
+          <div className="bg-white rounded-[18px] p-8 mb-6">
+            <div className="flex items-start gap-6">
+              <div className="w-16 h-16 bg-[#f5f5f7] rounded-[16px] flex items-center justify-center flex-shrink-0">
+                <Brain className="w-8 h-8 text-[#86868b]" />
               </div>
-              <div>
-                <h2 className="font-semibold text-slate-800 mb-1">Mental Wellness Check</h2>
-                <p className="text-sm text-slate-600">
+              <div className="flex-1">
+                <h2 className="text-[24px] font-semibold text-[#1d1d1f] mb-2">
+                  Mental Wellness
+                </h2>
+                <p className="text-[17px] font-normal text-[#86868b] leading-relaxed">
                   A space to process your thoughts and feelings. Completely private.
                 </p>
               </div>
             </div>
           </div>
           
-          {/* Stats */}
-          {mentalEntries.length > 0 && (
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-slate-800 flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5 text-purple-500" />
-                  Your Patterns
-                </h3>
-                <span className="text-sm text-slate-400">{mentalEntries.length} entries</span>
-              </div>
-              <div className="grid grid-cols-3 gap-4">
-                <div className="text-center p-4 bg-slate-50 rounded-xl">
-                  <p className="text-2xl font-bold text-purple-600">
-                    {Math.round(mentalEntries.reduce((acc, e) => acc + e.mood, 0) / mentalEntries.length * 10) / 10}
-                  </p>
-                  <p className="text-xs text-slate-500">Avg Mood</p>
-                </div>
-                <div className="text-center p-4 bg-slate-50 rounded-xl">
-                  <p className="text-2xl font-bold text-amber-600">
-                    {Math.round(mentalEntries.reduce((acc, e) => acc + e.anxiety, 0) / mentalEntries.length * 10) / 10}
-                  </p>
-                  <p className="text-xs text-slate-500">Avg Anxiety</p>
-                </div>
-                <div className="text-center p-4 bg-slate-50 rounded-xl">
-                  <p className="text-2xl font-bold text-blue-600">
-                    {Math.round(mentalEntries.reduce((acc, e) => acc + e.energy, 0) / mentalEntries.length * 10) / 10}
-                  </p>
-                  <p className="text-xs text-slate-500">Avg Energy</p>
-                </div>
-              </div>
-            </div>
-          )}
-          
-          {/* Add Entry */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-            <h3 className="font-semibold text-slate-800 mb-5">How are you feeling?</h3>
-            
-            <div className="space-y-6">
+          {/* Form */}
+          <div className="bg-white rounded-[18px] p-8 mb-6">
+            <div className="space-y-8">
               {/* Mood */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-3">
+                <label className="block text-[15px] font-medium text-[#1d1d1f] mb-4 text-center">
                   Overall mood
                 </label>
                 <div className="flex items-center justify-center gap-3">
@@ -651,10 +453,10 @@ export default function Home() {
                     <button
                       key={mood}
                       onClick={() => setMentalMood(mood)}
-                      className={`w-14 h-14 rounded-xl flex items-center justify-center text-2xl transition-all ${
+                      className={`w-16 h-16 rounded-[16px] flex items-center justify-center text-[28px] transition-all duration-300 ${
                         mentalMood === mood
-                          ? 'bg-purple-100 ring-2 ring-purple-400 scale-110'
-                          : 'bg-slate-50 hover:bg-slate-100'
+                          ? 'bg-[#f5f5f7] ring-2 ring-[#0071e3] scale-105'
+                          : 'bg-transparent hover:bg-[#f5f5f7]'
                       }`}
                     >
                       {getMoodEmoji(mood)}
@@ -663,112 +465,52 @@ export default function Home() {
                 </div>
               </div>
               
-              {/* Anxiety */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-3">
-                  Anxiety level
-                </label>
-                <div className="flex items-center justify-center gap-3">
-                  {[1, 2, 3, 4, 5].map((level) => (
-                    <button
-                      key={level}
-                      onClick={() => setAnxietyLevel(level)}
-                      className={`w-14 h-14 rounded-xl flex items-center justify-center font-medium transition-all ${
-                        anxietyLevel === level
-                          ? level >= 4 
-                            ? 'bg-red-100 ring-2 ring-red-400 text-red-700'
-                            : level >= 3
-                              ? 'bg-amber-100 ring-2 ring-amber-400 text-amber-700'
-                              : 'bg-green-100 ring-2 ring-green-400 text-green-700'
-                          : 'bg-slate-50 hover:bg-slate-100 text-slate-600'
-                      }`}
-                    >
-                      {level}
-                    </button>
-                  ))}
-                </div>
-                <div className="flex justify-between text-xs text-slate-400 mt-2 px-4">
-                  <span>Calm</span>
-                  <span>Overwhelmed</span>
-                </div>
-              </div>
-              
-              {/* Energy */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-3">
-                  Energy level
-                </label>
-                <div className="flex items-center justify-center gap-3">
-                  {[1, 2, 3, 4, 5].map((level) => (
-                    <button
-                      key={level}
-                      onClick={() => setEnergyLevel(level)}
-                      className={`w-14 h-14 rounded-xl flex items-center justify-center font-medium transition-all ${
-                        energyLevel === level
-                          ? level >= 4
-                            ? 'bg-blue-100 ring-2 ring-blue-400 text-blue-700'
-                            : level >= 3
-                              ? 'bg-sky-100 ring-2 ring-sky-400 text-sky-700'
-                              : 'bg-slate-100 ring-2 ring-slate-400 text-slate-700'
-                          : 'bg-slate-50 hover:bg-slate-100 text-slate-600'
-                      }`}
-                    >
-                      {level}
-                    </button>
-                  ))}
-                </div>
-                <div className="flex justify-between text-xs text-slate-400 mt-2 px-4">
-                  <span>Exhausted</span>
-                  <span>Energized</span>
-                </div>
-              </div>
-              
               {/* Thoughts */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+              <div className="group">
+                <label className="block text-[15px] font-medium text-[#1d1d1f] mb-3 transition-colors group-focus-within:text-[#0071e3]">
                   What&apos;s on your mind?
                 </label>
                 <textarea
                   placeholder="Thoughts, worries, or just whatever's there..."
                   value={currentThoughts}
                   onChange={(e) => setCurrentThoughts(e.target.value)}
-                  rows={3}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-purple-400 focus:bg-white resize-none"
+                  rows={4}
+                  className="w-full px-4 py-3 bg-[#f5f5f7] border border-transparent rounded-[12px] text-[17px] text-[#1d1d1f] placeholder-[#86868b] focus:bg-white focus:border-[#0071e3] focus:outline-none transition-all resize-none"
                 />
               </div>
               
               {/* Triggers */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+              <div className="group">
+                <label className="block text-[15px] font-medium text-[#1d1d1f] mb-3 transition-colors group-focus-within:text-[#0071e3]">
                   Any triggers or stressors?
                 </label>
                 <textarea
                   placeholder="What might be affecting how you feel?"
                   value={currentTriggers}
                   onChange={(e) => setCurrentTriggers(e.target.value)}
-                  rows={2}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-purple-400 focus:bg-white resize-none"
+                  rows={3}
+                  className="w-full px-4 py-3 bg-[#f5f5f7] border border-transparent rounded-[12px] text-[17px] text-[#1d1d1f] placeholder-[#86868b] focus:bg-white focus:border-[#0071e3] focus:outline-none transition-all resize-none"
                 />
               </div>
               
               {/* Coping */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+              <div className="group">
+                <label className="block text-[15px] font-medium text-[#1d1d1f] mb-3 transition-colors group-focus-within:text-[#0071e3]">
                   What helps?
                 </label>
                 <textarea
                   placeholder="Things that make you feel better..."
                   value={currentCoping}
                   onChange={(e) => setCurrentCoping(e.target.value)}
-                  rows={2}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-purple-400 focus:bg-white resize-none"
+                  rows={3}
+                  className="w-full px-4 py-3 bg-[#f5f5f7] border border-transparent rounded-[12px] text-[17px] text-[#1d1d1f] placeholder-[#86868b] focus:bg-white focus:border-[#0071e3] focus:outline-none transition-all resize-none"
                 />
               </div>
               
               <button
                 onClick={saveMentalEntry}
                 disabled={!currentThoughts && !currentTriggers && !currentCoping}
-                className="w-full py-3 bg-purple-500 text-white rounded-xl font-medium hover:bg-purple-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full py-4 bg-[#0071e3] text-white text-[17px] font-medium rounded-[18px] hover:bg-[#0077ed] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 mt-4"
               >
                 <CheckCircle2 className="w-5 h-5" />
                 Save Entry
@@ -776,157 +518,115 @@ export default function Home() {
             </div>
           </div>
           
-          {/* Success */}
+          {/* Success Message */}
           {showMentalSuccess && (
-            <div className="bg-purple-100 border border-purple-300 rounded-xl p-4 flex items-center gap-3 animate-fadeIn">
-              <CheckCircle2 className="w-6 h-6 text-purple-600" />
-              <p className="text-purple-700 font-medium">Entry saved. Thank you for checking in.</p>
+            <div className="bg-[#d4edda] border border-[#c3e6cb] rounded-[12px] p-4 mb-6 flex items-center gap-3 animate-fadeIn">
+              <CheckCircle2 className="w-5 h-5 text-[#28a745]" />
+              <p className="text-[15px] font-medium text-[#155724]">Entry saved. Thank you for checking in.</p>
             </div>
           )}
           
-          {/* Search */}
-          <div className="mb-4 relative">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Search your entries..."
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value)
-                setMentalPage(1)
-              }}
-              className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-purple-400 focus:bg-white"
-            />
-          </div>
-          
           {/* History */}
-          {mentalEntries.length > 0 && (() => {
-            const filtered = mentalEntries.filter(e => 
-              !searchQuery || 
-              e.thoughts.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              e.triggers.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              e.coping.toLowerCase().includes(searchQuery.toLowerCase())
-            )
-            const totalPages = Math.ceil(filtered.length / ENTRIES_PER_PAGE)
-            const paginated = filtered.slice((mentalPage - 1) * ENTRIES_PER_PAGE, mentalPage * ENTRIES_PER_PAGE)
-            
-            if (filtered.length === 0) {
-              return <p className="text-center text-slate-400 py-4">No entries found</p>
-            }
-            
-            return (
-              <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-slate-800">Your Entries</h3>
-                  <span className="text-sm text-slate-400">{filtered.length} entries</span>
+          {mentalEntries.length > 0 && (
+            <div className="mb-6">
+              {/* Search */}
+              <div className="relative mb-6">
+                <input
+                  type="text"
+                  placeholder="Search your entries..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full px-4 py-3 pl-12 bg-[#f5f5f7] border border-transparent rounded-[12px] text-[15px] text-[#1d1d1f] placeholder-[#86868b] focus:bg-white focus:border-[#0071e3] focus:outline-none transition-all"
+                />
+                <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
+                  <div className="w-4 h-4 border-2 border-[#86868b] rounded-full" />
                 </div>
-                <div className="space-y-4">
-                  {paginated.map((entry) => (
-                    <div 
-                      key={entry.id}
-                      className={`p-4 rounded-xl relative cursor-pointer transition-all ${
-                        expandedMentalId === entry.id
-                          ? 'bg-purple-50 border-2 border-purple-300'
-                          : 'bg-slate-50 border border-transparent hover:border-purple-200'
-                      }`}
-                      onClick={() => setExpandedMentalId(expandedMentalId === entry.id ? null : entry.id)}
-                    >
-                      <div className="flex items-start justify-between gap-4 mb-3">
-                        <span className="text-xs text-slate-400">{formatDate(entry.date)}</span>
-                        <div className="flex items-center gap-2">
-                          <span className="text-lg">{getMoodEmoji(entry.mood)}</span>
+              </div>
+              
+              <div className="space-y-4">
+                {filteredMental.map((entry) => (
+                  <div 
+                    key={entry.id}
+                    className={`bg-white rounded-[16px] p-6 cursor-pointer transition-all duration-300 ${
+                      expandedMentalId === entry.id ? 'ring-2 ring-[#0071e3]' : 'hover:ring-2 hover:ring-[#e8e8ed]'
+                    }`}
+                    onClick={() => setExpandedMentalId(expandedMentalId === entry.id ? null : entry.id)}
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-[14px] text-[#86868b]">{formatDate(entry.date)}</span>
+                      <span className="text-[24px]">{getMoodEmoji(entry.mood)}</span>
+                    </div>
+                    
+                    {entry.thoughts && (
+                      <p className="text-[15px] text-[#1d1d1f] line-clamp-2">
+                        {entry.thoughts}
+                      </p>
+                    )}
+                    
+                    {expandedMentalId === entry.id && (
+                      <div className="mt-4 pt-4 border-t border-[#f5f5f7] space-y-3 animate-fadeIn">
+                        {entry.thoughts && (
+                          <div>
+                            <p className="text-[12px] font-semibold text-[#86868b] uppercase tracking-wide mb-1">ON MY MIND</p>
+                            <p className="text-[15px] text-[#1d1d1f]">{entry.thoughts}</p>
+                          </div>
+                        )}
+                        {entry.triggers && (
+                          <div>
+                            <p className="text-[12px] font-semibold text-[#86868b] uppercase tracking-wide mb-1">TRIGGERS</p>
+                            <p className="text-[15px] text-[#1d1d1f]">{entry.triggers}</p>
+                          </div>
+                        )}
+                        {entry.coping && (
+                          <div>
+                            <p className="text-[12px] font-semibold text-[#86868b] uppercase tracking-wide mb-1">WHAT HELPS</p>
+                            <p className="text-[15px] text-[#1d1d1f]">{entry.coping}</p>
+                          </div>
+                        )}
+                        <div className="flex items-center justify-between pt-2">
+                          <span className="text-[13px] text-[#86868b]">Mood: {getMoodEmoji(entry.mood)}</span>
                           <button 
                             onClick={(e) => {
                               e.stopPropagation()
                               deleteEntry(entry.id, 'mental')
                             }}
-                            className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 transition-all"
+                            className="text-[13px] text-[#86868b] hover:text-[#ff3b30] transition-colors"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            Delete
                           </button>
                         </div>
                       </div>
-                      
-                      {/* Preview */}
-                      <div className="flex gap-4 mb-2 text-xs">
-                        <span className={entry.anxiety >= 4 ? 'text-red-600' : entry.anxiety >= 3 ? 'text-amber-600' : 'text-green-600'}>
-                          Anxiety: {entry.anxiety}/5
-                        </span>
-                        <span className={entry.energy >= 4 ? 'text-blue-600' : entry.energy >= 3 ? 'text-sky-600' : 'text-slate-500'}>
-                          Energy: {entry.energy}/5
-                        </span>
+                    )}
+                    
+                    {!expandedMentalId && (entry.triggers || entry.coping) && (
+                      <div className="mt-2 text-[13px] text-[#86868b] flex items-center gap-1">
+                        <ChevronDown className="w-4 h-4" />
+                        Show more
                       </div>
-                      
-                      {/* Expanded View */}
-                      {expandedMentalId === entry.id && (
-                        <div className="mt-4 pt-4 border-t border-purple-200 space-y-3 animate-fadeIn">
-                          {entry.thoughts && (
-                            <div>
-                              <p className="text-xs font-medium text-purple-600 mb-1">ON MY MIND</p>
-                              <p className="text-sm text-slate-700">{entry.thoughts}</p>
-                            </div>
-                          )}
-                          {entry.triggers && (
-                            <div>
-                              <p className="text-xs font-medium text-red-600 mb-1">TRIGGERS</p>
-                              <p className="text-sm text-slate-700">{entry.triggers}</p>
-                            </div>
-                          )}
-                          {entry.coping && (
-                            <div>
-                              <p className="text-xs font-medium text-green-600 mb-1">WHAT HELPS</p>
-                              <p className="text-sm text-slate-700">{entry.coping}</p>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-                
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="flex items-center justify-center gap-2 mt-6">
-                    <button
-                      onClick={() => setMentalPage(p => Math.max(1, p - 1))}
-                      disabled={mentalPage === 1}
-                      className="px-3 py-1 bg-slate-100 rounded-lg disabled:opacity-50 text-sm"
-                    >
-                      Previous
-                    </button>
-                    <span className="text-sm text-slate-500">
-                      Page {mentalPage} of {totalPages}
-                    </span>
-                    <button
-                      onClick={() => setMentalPage(p => Math.min(totalPages, p + 1))}
-                      disabled={mentalPage === totalPages}
-                      className="px-3 py-1 bg-slate-100 rounded-lg disabled:opacity-50 text-sm"
-                    >
-                      Next
-                    </button>
+                    )}
                   </div>
-                )}
+                ))}
               </div>
-            )
-          })()}
-        </div>
+            </div>
+          )}
+        </main>
       )}
       
       {/* Footer */}
-      <footer className="max-w-2xl mx-auto px-4 py-8">
+      <footer className="max-w-2xl mx-auto px-6 py-12">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-slate-400">
+          <p className="text-[13px] text-[#86868b]">
             WeeklyMind © 2026 • 100% private, no tracking
           </p>
           <button 
             onClick={exportData}
-            className="text-xs text-slate-500 hover:text-slate-700 flex items-center gap-1 px-3 py-1 bg-slate-100 rounded-lg hover:bg-slate-200 transition-all"
+            className="text-[13px] text-[#86868b] hover:text-[#1d1d1f] flex items-center gap-2 px-4 py-2 rounded-[12px] hover:bg-[#e8e8ed] transition-all"
           >
-            <Download className="w-3 h-3" />
-            Export My Data
+            <Download className="w-4 h-4" />
+            Export Data
           </button>
         </div>
       </footer>
-    </main>
+    </div>
   )
 }
