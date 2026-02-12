@@ -63,6 +63,8 @@ export default function Home() {
   const [currentMood, setCurrentMood] = useState(3)
   const [showWeeklySuccess, setShowWeeklySuccess] = useState(false)
   
+  const [expandedMentalId, setExpandedMentalId] = useState<string | null>(null)
+  
   // Mental wellness state
   const [mentalEntries, setMentalEntries] = useState<MentalEntry[]>([])
   const [mentalMood, setMentalMood] = useState(3)
@@ -77,6 +79,47 @@ export default function Home() {
   const [weeklyPage, setWeeklyPage] = useState(1)
   const [mentalPage, setMentalPage] = useState(1)
   const ENTRIES_PER_PAGE = 10
+  
+  const [expandedEntryId, setExpandedEntryId] = useState<string | null>(null)
+  
+  // Calculate streak (consecutive entries)
+  const calculateStreak = () => {
+    if (weeklyEntries.length === 0) return 0
+    
+    let streak = 1
+    const sorted = [...weeklyEntries].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    
+    for (let i = 0; i < sorted.length - 1; i++) {
+      const current = new Date(sorted[i].date)
+      const next = new Date(sorted[i + 1].date)
+      const diffDays = Math.floor((current.getTime() - next.getTime()) / (1000 * 60 * 60 * 24))
+      
+      if (diffDays <= 14) {
+        streak++
+      } else {
+        break
+      }
+    }
+    
+    return streak
+  }
+  
+  const streak = calculateStreak()
+  
+  // Simple trend data (last 12 entries)
+  const getTrendData = () => {
+    const sorted = [...weeklyEntries]
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .slice(-12)
+    
+    return sorted.map((e, i) => ({
+      week: i + 1,
+      mood: e.mood,
+      date: formatDate(e.date)
+    }))
+  }
+  
+  const trendData = getTrendData()
   
   // Load from localStorage
   useEffect(() => {
@@ -273,7 +316,7 @@ export default function Home() {
                 </h3>
                 <span className="text-sm text-slate-400">{weeklyEntries.length} entries</span>
               </div>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-4 gap-4">
                 <div className="text-center p-4 bg-slate-50 rounded-xl">
                   <p className="text-2xl font-bold text-mind-600">{weeklyEntries.length}</p>
                   <p className="text-xs text-slate-500">Weeks Tracked</p>
@@ -290,7 +333,28 @@ export default function Home() {
                   </p>
                   <p className="text-xs text-slate-500">Gratitude Notes</p>
                 </div>
+                <div className="text-center p-4 bg-amber-50 rounded-xl">
+                  <p className="text-2xl font-bold text-amber-600">{streak}</p>
+                  <p className="text-xs text-slate-500">Week Streak</p>
+                </div>
               </div>
+              
+              {/* Simple Trend Chart */}
+              {trendData.length > 1 && (
+                <div className="mt-4 pt-4 border-t border-slate-100">
+                  <p className="text-xs text-slate-500 mb-2">Mood Trend (Last {trendData.length} weeks)</p>
+                  <div className="h-16 flex items-end gap-1">
+                    {trendData.map((point, i) => (
+                      <div
+                        key={i}
+                        className="flex-1 bg-mind-200 rounded-t"
+                        style={{ height: `${(point.mood / 5) * 100}%` }}
+                        title={`Week ${point.week}: ${point.mood}/5 - ${point.date}`}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
           
@@ -420,7 +484,15 @@ export default function Home() {
                   <>
                     <div className="space-y-4">
                       {paginated.map((entry) => (
-                        <div key={entry.id} className="p-4 bg-slate-50 rounded-xl relative group">
+                        <div 
+                          key={entry.id} 
+                          className={`p-4 rounded-xl relative group cursor-pointer transition-all ${
+                            expandedEntryId === entry.id 
+                              ? 'bg-mind-50 border-2 border-mind-300' 
+                              : 'bg-slate-50 border border-transparent hover:border-mind-200'
+                          }`}
+                          onClick={() => setExpandedEntryId(expandedEntryId === entry.id ? null : entry.id)}
+                        >
                           <div className="flex items-start justify-between gap-4 mb-2">
                             <span className="text-xs font-medium text-mind-600 bg-mind-100 px-2 py-1 rounded-lg">
                               {entry.weekNumber} • {formatDate(entry.date)}
@@ -428,22 +500,56 @@ export default function Home() {
                             <div className="flex items-center gap-2">
                               <span className="text-lg">{getMoodEmoji(entry.mood)}</span>
                               <button 
-                                onClick={() => deleteEntry(entry.id, 'weekly')}
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  deleteEntry(entry.id, 'weekly')
+                                }}
                                 className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 transition-all"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>
                             </div>
                           </div>
-                          {entry.highlight && (
-                            <p className="text-sm text-slate-700 mb-1">
-                              <span className="font-medium text-mind-700">Highlight:</span> {entry.highlight}
-                            </p>
-                          )}
-                          {entry.gratitude && (
-                            <p className="text-sm text-slate-600">
-                              <span className="font-medium text-green-700">Grateful:</span> {entry.gratitude}
-                            </p>
+                          
+                          {/* Preview */}
+                          <div className="text-sm text-slate-700">
+                            {entry.highlight && (
+                              <p className="mb-1">
+                                <span className="font-medium text-mind-700">Highlight:</span> {entry.highlight.length > 60 ? entry.highlight.slice(0, 60) + '...' : entry.highlight}
+                              </p>
+                            )}
+                            {expandedEntryId !== entry.id && entry.gratitude && (
+                              <p className="text-slate-600 text-xs">
+                                + {entry.gratitude.length > 40 ? entry.gratitude.slice(0, 40) + '...' : entry.gratitude}
+                              </p>
+                            )}
+                          </div>
+                          
+                          {/* Expanded View */}
+                          {expandedEntryId === entry.id && (
+                            <div className="mt-4 pt-4 border-t border-mind-200 space-y-3 animate-fadeIn">
+                              {entry.highlight && (
+                                <div>
+                                  <p className="text-xs font-medium text-mind-600 mb-1">HIGHLIGHT</p>
+                                  <p className="text-sm text-slate-700">{entry.highlight}</p>
+                                </div>
+                              )}
+                              {entry.challenge && (
+                                <div>
+                                  <p className="text-xs font-medium text-amber-600 mb-1">CHALLENGING</p>
+                                  <p className="text-sm text-slate-700">{entry.challenge}</p>
+                                </div>
+                              )}
+                              {entry.gratitude && (
+                                <div>
+                                  <p className="text-xs font-medium text-green-600 mb-1">GRATEFUL</p>
+                                  <p className="text-sm text-slate-700">{entry.gratitude}</p>
+                                </div>
+                              )}
+                              <div className="flex items-center gap-2 pt-2">
+                                <span className="text-xs text-slate-400">Mood: {getMoodEmoji(entry.mood)} ({entry.mood}/5)</span>
+                              </div>
+                            </div>
                           )}
                         </div>
                       ))}
@@ -716,19 +822,32 @@ export default function Home() {
                 </div>
                 <div className="space-y-4">
                   {paginated.map((entry) => (
-                    <div key={entry.id} className="p-4 bg-slate-50 rounded-xl relative group">
+                    <div 
+                      key={entry.id}
+                      className={`p-4 rounded-xl relative cursor-pointer transition-all ${
+                        expandedMentalId === entry.id
+                          ? 'bg-purple-50 border-2 border-purple-300'
+                          : 'bg-slate-50 border border-transparent hover:border-purple-200'
+                      }`}
+                      onClick={() => setExpandedMentalId(expandedMentalId === entry.id ? null : entry.id)}
+                    >
                       <div className="flex items-start justify-between gap-4 mb-3">
                         <span className="text-xs text-slate-400">{formatDate(entry.date)}</span>
                         <div className="flex items-center gap-2">
                           <span className="text-lg">{getMoodEmoji(entry.mood)}</span>
                           <button 
-                            onClick={() => deleteEntry(entry.id, 'mental')}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              deleteEntry(entry.id, 'mental')
+                            }}
                             className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 transition-all"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
                       </div>
+                      
+                      {/* Preview */}
                       <div className="flex gap-4 mb-2 text-xs">
                         <span className={entry.anxiety >= 4 ? 'text-red-600' : entry.anxiety >= 3 ? 'text-amber-600' : 'text-green-600'}>
                           Anxiety: {entry.anxiety}/5
@@ -737,13 +856,29 @@ export default function Home() {
                           Energy: {entry.energy}/5
                         </span>
                       </div>
-                      {entry.thoughts && (
-                        <p className="text-sm text-slate-700 mb-1">{entry.thoughts}</p>
-                      )}
-                      {entry.coping && (
-                        <p className="text-sm text-purple-600">
-                          <span className="font-medium">Helps:</span> {entry.coping}
-                        </p>
+                      
+                      {/* Expanded View */}
+                      {expandedMentalId === entry.id && (
+                        <div className="mt-4 pt-4 border-t border-purple-200 space-y-3 animate-fadeIn">
+                          {entry.thoughts && (
+                            <div>
+                              <p className="text-xs font-medium text-purple-600 mb-1">ON MY MIND</p>
+                              <p className="text-sm text-slate-700">{entry.thoughts}</p>
+                            </div>
+                          )}
+                          {entry.triggers && (
+                            <div>
+                              <p className="text-xs font-medium text-red-600 mb-1">TRIGGERS</p>
+                              <p className="text-sm text-slate-700">{entry.triggers}</p>
+                            </div>
+                          )}
+                          {entry.coping && (
+                            <div>
+                              <p className="text-xs font-medium text-green-600 mb-1">WHAT HELPS</p>
+                              <p className="text-sm text-slate-700">{entry.coping}</p>
+                            </div>
+                          )}
+                        </div>
                       )}
                     </div>
                   ))}
