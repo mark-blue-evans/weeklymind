@@ -803,7 +803,7 @@ export default function Home() {
       <footer className="max-w-lg mx-auto px-6 py-8">
         <div className="flex items-center justify-between">
           <p className="text-[12px] text-[#b0b0b5]">
-            WeeklyMind © 2026 • SHARE TEST
+            WeeklyMind © 2026
           </p>
           <div className="flex items-center gap-2">
             {/* Share Button */}
