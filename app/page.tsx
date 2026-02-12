@@ -817,31 +817,32 @@ export default function Home() {
             
             {/* Export Dropdown */}
             <div className="relative">
-            <button 
-              onClick={() => setShowExportMenu(!showExportMenu)}
-              className="text-[12px] text-[#86868b] hover:text-[#1d1d1d] flex items-center gap-1.5 px-3 py-1.5 rounded-full hover:bg-[#e8e8ed] transition-all"
-            >
-              <Download size={14} />
-              Export
-            </button>
-            {showExportMenu && (
-              <div className="absolute bottom-full right-0 mb-1 bg-white rounded-lg shadow-lg border border-[#e5e5e7] py-1 min-w-[120px] animate-scaleIn z-50">
-                <button 
-                  onClick={() => { exportData('json'); setShowExportMenu(false); }}
-                  className="w-full px-4 py-2 text-left text-[13px] hover:bg-[#f5f5f5] transition-colors flex items-center gap-2"
-                >
-                  <FileDown size={14} />
-                  JSON (Data)
-                </button>
-                <button 
-                  onClick={() => { exportData('pdf'); setShowExportMenu(false); }}
-                  className="w-full px-4 py-2 text-left text-[13px] hover:bg-[#f5f5f5] transition-colors flex items-center gap-2"
-                >
-                  <FileDown size={14} />
-                  Text (Summary)
-                </button>
-              </div>
-            )}
+              <button 
+                onClick={() => setShowExportMenu(!showExportMenu)}
+                className="text-[12px] text-[#86868b] hover:text-[#1d1d1d] flex items-center gap-1.5 px-3 py-1.5 rounded-full hover:bg-[#e8e8ed] transition-all"
+              >
+                <Download size={14} />
+                Export
+              </button>
+              {showExportMenu && (
+                <div className="absolute bottom-full right-0 mb-1 bg-white rounded-lg shadow-lg border border-[#e5e5e7] py-1 min-w-[120px] animate-scaleIn z-50">
+                  <button 
+                    onClick={() => { exportData('json'); setShowExportMenu(false); }}
+                    className="w-full px-4 py-2 text-left text-[13px] hover:bg-[#f5f5f5] transition-colors flex items-center gap-2"
+                  >
+                    <FileDown size={14} />
+                    JSON (Data)
+                  </button>
+                  <button 
+                    onClick={() => { exportData('pdf'); setShowExportMenu(false); }}
+                    className="w-full px-4 py-2 text-left text-[13px] hover:bg-[#f5f5f5] transition-colors flex items-center gap-2"
+                  >
+                    <FileDown size={14} />
+                    Text (Summary)
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </footer>
