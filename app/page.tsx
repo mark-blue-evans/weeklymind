@@ -307,38 +307,6 @@ export default function Home() {
     e.thoughts.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
-  // Share functionality
-  const shareWeeklyMind = async () => {
-    const shareText = 'WeeklyMind - Simple, private mental wellness check-in. 3 questions weekly. 100% private.'
-    const shareUrl = 'https://weeklymind.vercel.app'
-    
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: 'WeeklyMind',
-          text: shareText,
-          url: shareUrl
-        })
-        incrementShareCount()
-      } catch (err) {
-        copyToClipboard()
-      }
-    } else {
-      copyToClipboard()
-    }
-  }
-
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText('https://weeklymind.vercel.app')
-    setShareToast(true)
-    setTimeout(() => setShareToast(false), 2000)
-    incrementShareCount()
-  }
-
-  const incrementShareCount = () => {
-    setShareCount(prev => prev + 1)
-  }
-
   const weeklyTotalPages = Math.ceil(filteredWeekly.length / ENTRIES_PER_PAGE)
   const mentalTotalPages = Math.ceil(filteredMental.length / ENTRIES_PER_PAGE)
 
@@ -551,7 +519,7 @@ export default function Home() {
                       </div>
                     </div>
                     
-                    {entry.highlight && (
+                    {entry.highlight && expandedEntryId !== entry.id && (
                       <p className="text-[14px] text-[#1d1d1d] line-clamp-2">
                         <span className="font-medium">Highlight:</span> {entry.highlight}
                       </p>
