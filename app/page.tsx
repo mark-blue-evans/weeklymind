@@ -342,7 +342,7 @@ export default function Home() {
                     <button
                       key={i}
                       onClick={() => setCurrentMood(i)}
-                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${
+                      className={`w-10 h-10 rounded-full flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-200 ${
                         currentMood === i
                           ? 'bg-[#1d1d1d]'
                           : 'hover:bg-[#f0f0f0]'
@@ -361,7 +361,7 @@ export default function Home() {
               <button
                 onClick={saveWeeklyEntry}
                 disabled={!currentHighlight && !currentChallenge && !currentGratitude}
-                className="w-full py-3 bg-[#1d1d1d] text-white text-[15px] font-medium rounded-[12px] hover:bg-[#333] disabled:opacity-40 disabled:cursor-not-allowed transition-all mt-2"
+                className="w-full py-3 bg-[#1d1d1d] text-white text-[15px] font-medium rounded-[12px] hover:bg-[#333] hover:scale-[1.01] active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed transition-all mt-2"
               >
                 Save Entry
               </button>
@@ -370,7 +370,7 @@ export default function Home() {
           
           {/* Success toast - minimal */}
           {showWeeklySuccess && (
-            <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-[#1d1d1d] text-white px-5 py-3 rounded-[12px] flex items-center gap-2 shadow-lg animate-fadeIn">
+            <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-[#1d1d1d] text-white px-5 py-3 rounded-[12px] flex items-center gap-2 shadow-lg animate-successPop">
               <Check size={16} />
               <span className="text-[14px] font-medium">Entry saved</span>
             </div>
@@ -411,7 +411,7 @@ export default function Home() {
                 {paginatedWeekly.map((entry) => (
                   <div 
                     key={entry.id}
-                    className="bg-white rounded-[16px] p-4 cursor-pointer hover:bg-[#fafafa] transition-all duration-200"
+                    className="bg-white rounded-[16px] p-4 cursor-pointer hover:bg-[#fafafa] hover:shadow-md hover:-translate-y-0.5 transition-all duration-300" animate-fadeInUp
                     onClick={() => setExpandedEntryId(expandedEntryId === entry.id ? null : entry.id)}
                   >
                     <div className="flex items-center justify-between mb-2">
@@ -475,7 +475,7 @@ export default function Home() {
                   <button
                     onClick={() => setWeeklyPage(Math.max(1, weeklyPage - 1))}
                     disabled={weeklyPage === 1}
-                    className="p-2 rounded-full hover:bg-[#f0f0f0] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                    className="p-2 rounded-full hover:bg-[#f0f0f0] hover:scale-110 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                   >
                     <ChevronLeft size={18} className="text-[#86868b]" />
                   </button>
@@ -485,7 +485,7 @@ export default function Home() {
                   <button
                     onClick={() => setWeeklyPage(Math.min(weeklyTotalPages, weeklyPage + 1))}
                     disabled={weeklyPage === weeklyTotalPages}
-                    className="p-2 rounded-full hover:bg-[#f0f0f0] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                    className="p-2 rounded-full hover:bg-[#f0f0f0] hover:scale-110 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                   >
                     <ChevronRight size={18} className="text-[#86868b]" />
                   </button>
@@ -517,7 +517,7 @@ export default function Home() {
                     <button
                       key={i}
                       onClick={() => setMentalMood(i)}
-                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${
+                      className={`w-10 h-10 rounded-full flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-200 ${
                         mentalMood === i
                           ? 'bg-[#1d1d1d]'
                           : 'hover:bg-[#f0f0f0]'
@@ -577,7 +577,7 @@ export default function Home() {
               <button
                 onClick={saveMentalEntry}
                 disabled={!currentThoughts && !currentTriggers && !currentCoping}
-                className="w-full py-3 bg-[#1d1d1d] text-white text-[15px] font-medium rounded-[12px] hover:bg-[#333] disabled:opacity-40 disabled:cursor-not-allowed transition-all mt-2"
+                className="w-full py-3 bg-[#1d1d1d] text-white text-[15px] font-medium rounded-[12px] hover:bg-[#333] hover:scale-[1.01] active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed transition-all mt-2"
               >
                 Save Entry
               </button>
@@ -586,7 +586,7 @@ export default function Home() {
           
           {/* Success toast */}
           {showMentalSuccess && (
-            <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-[#1d1d1d] text-white px-5 py-3 rounded-[12px] flex items-center gap-2 shadow-lg animate-fadeIn">
+            <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-[#1d1d1d] text-white px-5 py-3 rounded-[12px] flex items-center gap-2 shadow-lg animate-successPop">
               <Check size={16} />
               <span className="text-[14px] font-medium">Entry saved</span>
             </div>
@@ -624,7 +624,7 @@ export default function Home() {
                 {paginatedMental.map((entry) => (
                   <div 
                     key={entry.id}
-                    className="bg-white rounded-[16px] p-4 cursor-pointer hover:bg-[#fafafa] transition-all duration-200"
+                    className="bg-white rounded-[16px] p-4 cursor-pointer hover:bg-[#fafafa] hover:shadow-md hover:-translate-y-0.5 transition-all duration-300" animate-fadeInUp
                     onClick={() => setExpandedMentalId(expandedMentalId === entry.id ? null : entry.id)}
                   >
                     <div className="flex items-center justify-between mb-2">
@@ -683,7 +683,7 @@ export default function Home() {
                   <button
                     onClick={() => setMentalPage(Math.max(1, mentalPage - 1))}
                     disabled={mentalPage === 1}
-                    className="p-2 rounded-full hover:bg-[#f0f0f0] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                    className="p-2 rounded-full hover:bg-[#f0f0f0] hover:scale-110 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                   >
                     <ChevronLeft size={18} className="text-[#86868b]" />
                   </button>
@@ -693,7 +693,7 @@ export default function Home() {
                   <button
                     onClick={() => setMentalPage(Math.min(mentalTotalPages, mentalPage + 1))}
                     disabled={mentalPage === mentalTotalPages}
-                    className="p-2 rounded-full hover:bg-[#f0f0f0] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                    className="p-2 rounded-full hover:bg-[#f0f0f0] hover:scale-110 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                   >
                     <ChevronRight size={18} className="text-[#86868b]" />
                   </button>
