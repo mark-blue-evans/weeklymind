@@ -7,6 +7,7 @@ import {
   ChevronDown,
   Download,
   FileDown,
+  Share2,
   Circle,
   CircleDot,
   ChevronLeft,
@@ -106,6 +107,9 @@ export default function Home() {
   const [currentCoping, setCurrentCoping] = useState('')
   const [showMentalSuccess, setShowMentalSuccess] = useState(false)
   const [showExportMenu, setShowExportMenu] = useState(false)
+  const [showShareMenu, setShowShareMenu] = useState(false)
+  const [shareCount, setShareCount] = useState(0)
+  const [shareToast, setShareToast] = useState(false)
   const [expandedMentalId, setExpandedMentalId] = useState<string | null>(null)
   
   // Load from localStorage
@@ -126,6 +130,19 @@ export default function Home() {
     localStorage.setItem('weeklymind_weekly', JSON.stringify(weeklyEntries))
     localStorage.setItem('weeklymind_mental', JSON.stringify(mentalEntries))
   }, [weeklyEntries, mentalEntries])
+  
+  // Load share count
+  useEffect(() => {
+    const savedShareCount = localStorage.getItem('weeklymind_share_count')
+    if (savedShareCount) {
+      setShareCount(parseInt(savedShareCount))
+    }
+  }, [])
+  
+  // Save share count
+  useEffect(() => {
+    localStorage.setItem('weeklymind_share_count', shareCount.toString())
+  }, [shareCount])
   
   const getWeekNumber = () => {
     const now = new Date()
@@ -246,6 +263,39 @@ export default function Home() {
     link.click()
   }
 
+  // Share functionality
+  const shareWeeklyMind = async () => {
+    const shareText = 'WeeklyMind - Simple, private mental wellness check-in. 3 questions weekly. 100% private.'
+    const shareUrl = 'https://weeklymind.vercel.app'
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'WeeklyMind',
+          text: shareText,
+          url: shareUrl
+        })
+        incrementShareCount()
+      } catch (err) {
+        // User cancelled or error
+        copyToClipboard()
+      }
+    } else {
+      copyToClipboard()
+    }
+  }
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText('https://weeklymind.vercel.app')
+    setShareToast(true)
+    setTimeout(() => setShareToast(false), 2000)
+    incrementShareCount()
+  }
+
+  const incrementShareCount = () => {
+    setShareCount(prev => prev + 1)
+  }
+
   const filteredWeekly = weeklyEntries.filter(e => 
     !searchQuery || 
     e.highlight.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -256,6 +306,38 @@ export default function Home() {
     !searchQuery || 
     e.thoughts.toLowerCase().includes(searchQuery.toLowerCase())
   )
+
+  // Share functionality
+  const shareWeeklyMind = async () => {
+    const shareText = 'WeeklyMind - Simple, private mental wellness check-in. 3 questions weekly. 100% private.'
+    const shareUrl = 'https://weeklymind.vercel.app'
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'WeeklyMind',
+          text: shareText,
+          url: shareUrl
+        })
+        incrementShareCount()
+      } catch (err) {
+        copyToClipboard()
+      }
+    } else {
+      copyToClipboard()
+    }
+  }
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText('https://weeklymind.vercel.app')
+    setShareToast(true)
+    setTimeout(() => setShareToast(false), 2000)
+    incrementShareCount()
+  }
+
+  const incrementShareCount = () => {
+    setShareCount(prev => prev + 1)
+  }
 
   const weeklyTotalPages = Math.ceil(filteredWeekly.length / ENTRIES_PER_PAGE)
   const mentalTotalPages = Math.ceil(filteredMental.length / ENTRIES_PER_PAGE)
@@ -410,6 +492,14 @@ export default function Home() {
             <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-[#1d1d1d] text-white px-5 py-3 rounded-[12px] flex items-center gap-2 shadow-lg animate-successPop">
               <Check size={16} />
               <span className="text-[14px] font-medium">Entry saved</span>
+            </div>
+          )}
+          
+          {/* Share toast */}
+          {shareToast && (
+            <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-[#1d1d1d] text-white px-5 py-3 rounded-[12px] flex items-center gap-2 shadow-lg animate-successPop">
+              <Share2 size={16} />
+              <span className="text-[14px] font-medium">Link copied! Share WeeklyMind.</span>
             </div>
           )}
           
@@ -747,7 +837,18 @@ export default function Home() {
           <p className="text-[12px] text-[#b0b0b5]">
             WeeklyMind © 2026
           </p>
-          <div className="relative">
+          <div className="flex items-center gap-2">
+            {/* Share Button */}
+            <button 
+              onClick={shareWeeklyMind}
+              className="text-[12px] text-[#86868b] hover:text-[#1d1d1d] flex items-center gap-1.5 px-3 py-1.5 rounded-full hover:bg-[#e8e8ed] transition-all"
+            >
+              <Share2 size={14} />
+              {shareCount > 0 ? `Shared ${shareCount}x` : 'Share'}
+            </button>
+            
+            {/* Export Dropdown */}
+            <div className="relative">
             <button 
               onClick={() => setShowExportMenu(!showExportMenu)}
               className="text-[12px] text-[#86868b] hover:text-[#1d1d1d] flex items-center gap-1.5 px-3 py-1.5 rounded-full hover:bg-[#e8e8ed] transition-all"
