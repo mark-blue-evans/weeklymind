@@ -3,10 +3,9 @@
 @tailwind utilities;
 
 :root {
-  --foreground: #1a1a1a;
-  --foreground-secondary: #8e8e93;
+  --foreground: #1d1d1d;
+  --foreground-secondary: #86868b;
   --foreground-tertiary: #b0b0b5;
-  --background: #f8f9fa;
   --surface: #ffffff;
   --border: #e5e5e7;
   --accent: #007aff;
@@ -23,16 +22,16 @@ html {
 
 body {
   color: var(--foreground);
-  background: linear-gradient(135deg, #f8f9fa 0%, #fafbfc 50%, #f5f7f9 100%);
+  background: #fafafa;
   min-height: 100vh;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
 }
 
-/* Custom smooth fade animation */
+/* Smooth fade animation */
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(4px);
   }
   to {
     opacity: 1;
@@ -41,10 +40,10 @@ body {
 }
 
 .animate-fadeIn {
-  animation: fadeIn 0.5s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+  animation: fadeIn 0.3s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
 }
 
-/* Hide scrollbar but keep functionality */
+/* Hide scrollbar */
 textarea {
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -54,19 +53,19 @@ textarea::-webkit-scrollbar {
   display: none;
 }
 
-/* Custom focus states */
+/* Focus states */
 input:focus,
 textarea:focus {
   outline: none;
 }
 
-/* Smooth text selection */
+/* Text selection */
 ::selection {
   background: rgba(0, 122, 255, 0.2);
   color: var(--foreground);
 }
 
-/* Line clamp utility */
+/* Line clamp */
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -82,7 +81,6 @@ button {
   background: none;
 }
 
-/* Remove default input styles */
 input,
 textarea {
   font-family: inherit;
@@ -93,16 +91,16 @@ button,
 input,
 textarea,
 div {
-  transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+  transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
-/* Custom placeholder */
+/* Placeholder */
 ::placeholder {
   color: var(--foreground-tertiary);
   opacity: 1;
 }
 
-/* Hide number input spinners */
+/* Number input spinners */
 input[type='number']::-webkit-inner-spin-button,
 input[type='number']::-webkit-outer-spin-button {
   -webkit-appearance: none;

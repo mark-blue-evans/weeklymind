@@ -6,9 +6,11 @@ import {
   Brain,
   ChevronDown,
   Download,
-  Heart,
   Circle,
-  CircleDot
+  CircleDot,
+  ChevronLeft,
+  ChevronRight,
+  Check
 } from 'lucide-react'
 
 type Tab = 'weekly' | 'mental'
@@ -34,19 +36,20 @@ interface MentalEntry {
   coping: string
 }
 
+const ENTRIES_PER_PAGE = 5
+
 // Custom mood icons - Apple SF Symbols style
-const MoodIcon = ({ level }: { level: number }) => {
-  // 0=low, 1=low-mid, 2=mid, 3=mid-high, 4=high
-  const colors = ['#9ca3af', '#9ca3af', '#6b7280', '#6b7280', '#1a1a1a']
-  const sizes = [20, 22, 24, 26, 28]
+const MoodDot = ({ level }: { level: number }) => {
+  const colors = ['#b0b0b5', '#b0b0b5', '#86868b', '#86868b', '#1d1d1d']
+  const sizes = [18, 20, 22, 24, 26]
   
   if (level <= 1) {
     return (
       <Circle 
         size={sizes[level]} 
-        strokeWidth={2} 
-        className="transition-all duration-500"
-        style={{ color: colors[level], opacity: 0.5 + level * 0.15 }}
+        strokeWidth={1.5} 
+        className="transition-all duration-300"
+        style={{ color: colors[level] }}
       />
     )
   }
@@ -54,17 +57,17 @@ const MoodIcon = ({ level }: { level: number }) => {
     return (
       <Circle 
         size={24} 
-        strokeWidth={2} 
-        className="transition-all duration-500"
-        style={{ color: '#6b7280' }}
+        strokeWidth={1.5} 
+        className="transition-all duration-300"
+        style={{ color: '#86868b' }}
       />
     )
   }
   return (
     <CircleDot 
       size={sizes[level]} 
-      strokeWidth={2}
-      className="transition-all duration-500"
+      strokeWidth={1.5}
+      className="transition-all duration-300"
       style={{ color: colors[level] }}
     />
   )
@@ -73,10 +76,14 @@ const MoodIcon = ({ level }: { level: number }) => {
 export default function Home() {
   const [activeTab, setActiveTab] = useState<Tab>('weekly')
   const [searchQuery, setSearchQuery] = useState('')
+  const [weeklyPage, setWeeklyPage] = useState(1)
+  const [mentalPage, setMentalPage] = useState(1)
   
   const switchTab = (tab: Tab) => {
     setActiveTab(tab)
     setSearchQuery('')
+    setWeeklyPage(1)
+    setMentalPage(1)
   }
   
   // Weekly state
@@ -149,8 +156,9 @@ export default function Home() {
     setCurrentChallenge('')
     setCurrentGratitude('')
     setCurrentMood(2)
+    setWeeklyPage(1)
     setShowWeeklySuccess(true)
-    setTimeout(() => setShowWeeklySuccess(false), 4000)
+    setTimeout(() => setShowWeeklySuccess(false), 3000)
   }
   
   const saveMentalEntry = () => {
@@ -174,8 +182,9 @@ export default function Home() {
     setCurrentThoughts('')
     setCurrentTriggers('')
     setCurrentCoping('')
+    setMentalPage(1)
     setShowMentalSuccess(true)
-    setTimeout(() => setShowMentalSuccess(false), 4000)
+    setTimeout(() => setShowMentalSuccess(false), 3000)
   }
   
   const deleteEntry = (id: string, type: 'weekly' | 'mental') => {
@@ -211,26 +220,43 @@ export default function Home() {
     e.thoughts.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
+  const weeklyTotalPages = Math.ceil(filteredWeekly.length / ENTRIES_PER_PAGE)
+  const mentalTotalPages = Math.ceil(filteredMental.length / ENTRIES_PER_PAGE)
+
+  const paginatedWeekly = filteredWeekly.slice(
+    (weeklyPage - 1) * ENTRIES_PER_PAGE,
+    weeklyPage * ENTRIES_PER_PAGE
+  )
+
+  const paginatedMental = filteredMental.slice(
+    (mentalPage - 1) * ENTRIES_PER_PAGE,
+    mentalPage * ENTRIES_PER_PAGE
+  )
+
   const moodLabels = ['Tough', 'Difficult', 'Okay', 'Good', 'Great']
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#fafafa] via-[#fafafa] to-[#f5f5f5]">
-      {/* Header */}
-      <header className="pt-16 pb-8 px-8 max-w-xl mx-auto">
-        <h1 className="text-[48px] font-light tracking-tight text-[#1d1d1d] mb-1">
+    <div className="min-h-screen bg-[#fafafa]">
+      {/* Header - Apple style */}
+      <header className="pt-14 pb-6 px-6 max-w-lg mx-auto">
+        <h1 className="text-[44px] font-semibold tracking-tight text-[#1d1d1d]">
           WeeklyMind
         </h1>
-        <p className="text-[16px] font-light text-[#86868b]">
-          Your private wellness space
-        </p>
       </header>
       
-      {/* Tabs */}
-      <div className="max-w-xl mx-auto px-8 mb-12">
-        <div className="flex gap-0.5 bg-[#e8e8ed] p-0.5 rounded-full w-fit">
+      {/* Subtitle */}
+      <div className="px-6 max-w-lg mx-auto mb-10">
+        <p className="text-[17px] font-normal text-[#86868b]">
+          Your private wellness space
+        </p>
+      </div>
+      
+      {/* Tabs - iOS Segmented Control */}
+      <div className="px-6 max-w-lg mx-auto mb-12">
+        <div className="flex gap-0 bg-[#e8e8ed] p-0.5 rounded-[10px] w-fit">
           <button
             onClick={() => switchTab('weekly')}
-            className={`px-7 py-2 rounded-full text-[14px] font-medium transition-all duration-500 ${
+            className={`px-6 py-1.5 rounded-[8px] text-[13px] font-medium transition-all duration-200 ${
               activeTab === 'weekly' 
                 ? 'bg-white text-[#1d1d1d] shadow-sm' 
                 : 'text-[#86868b] hover:text-[#1d1d1d]'
@@ -240,7 +266,7 @@ export default function Home() {
           </button>
           <button
             onClick={() => switchTab('mental')}
-            className={`px-7 py-2 rounded-full text-[14px] font-medium transition-all duration-500 ${
+            className={`px-6 py-1.5 rounded-[8px] text-[13px] font-medium transition-all duration-200 ${
               activeTab === 'mental' 
                 ? 'bg-white text-[#1d1d1d] shadow-sm' 
                 : 'text-[#86868b] hover:text-[#1d1d1d]'
@@ -253,23 +279,20 @@ export default function Home() {
       
       {/* Weekly Tab */}
       {activeTab === 'weekly' && (
-        <main className="max-w-xl mx-auto px-8 pb-24 animate-fadeIn">
-          {/* Intro */}
-          <div className="mb-10">
-            <h2 className="text-[24px] font-light text-[#1d1d1d] mb-2">
+        <main className="max-w-lg mx-auto px-6 pb-24 animate-fadeIn">
+          {/* Section header */}
+          <div className="mb-6">
+            <h2 className="text-[22px] font-semibold text-[#1d1d1d]">
               Weekly Check-in
             </h2>
-            <p className="text-[15px] font-light text-[#86868b] leading-relaxed max-w-md">
-              Take a moment to reflect on your week. Three simple questions to help you pause and notice what mattered.
-            </p>
           </div>
           
-          {/* Form */}
-          <div className="mb-10">
-            <div className="space-y-5">
+          {/* Form - Apple style inputs */}
+          <div className="mb-8">
+            <div className="space-y-4">
               {/* Highlight */}
               <div>
-                <label className="block text-[13px] font-medium text-[#1d1d1d] mb-2.5">
+                <label className="block text-[13px] font-medium text-[#1d1d1d] mb-2">
                   What was your highlight?
                 </label>
                 <textarea
@@ -277,13 +300,13 @@ export default function Home() {
                   value={currentHighlight}
                   onChange={(e) => setCurrentHighlight(e.target.value)}
                   rows={3}
-                  className="w-full px-4 py-3.5 bg-white border border-[#e5e5e7] rounded-[14px] text-[15px] text-[#1d1d1d] placeholder-[#b0b0b5] focus:border-[#007aff] focus:outline-none transition-colors resize-none"
+                  className="w-full px-4 py-3 bg-white border border-[#e5e5e7] rounded-[12px] text-[15px] text-[#1d1d1d] placeholder-[#b0b0b5] focus:border-[#007aff] focus:outline-none transition-colors resize-none"
                 />
               </div>
               
               {/* Challenge */}
               <div>
-                <label className="block text-[13px] font-medium text-[#1d1d1d] mb-2.5">
+                <label className="block text-[13px] font-medium text-[#1d1d1d] mb-2">
                   What was challenging?
                 </label>
                 <textarea
@@ -291,13 +314,13 @@ export default function Home() {
                   value={currentChallenge}
                   onChange={(e) => setCurrentChallenge(e.target.value)}
                   rows={3}
-                  className="w-full px-4 py-3.5 bg-white border border-[#e5e5e7] rounded-[14px] text-[15px] text-[#1d1d1d] placeholder-[#b0b0b5] focus:border-[#007aff] focus:outline-none transition-colors resize-none"
+                  className="w-full px-4 py-3 bg-white border border-[#e5e5e7] rounded-[12px] text-[15px] text-[#1d1d1d] placeholder-[#b0b0b5] focus:border-[#007aff] focus:outline-none transition-colors resize-none"
                 />
               </div>
               
               {/* Gratitude */}
               <div>
-                <label className="block text-[13px] font-medium text-[#1d1d1d] mb-2.5">
+                <label className="block text-[13px] font-medium text-[#1d1d1d] mb-2">
                   What are you grateful for?
                 </label>
                 <textarea
@@ -305,13 +328,13 @@ export default function Home() {
                   value={currentGratitude}
                   onChange={(e) => setCurrentGratitude(e.target.value)}
                   rows={3}
-                  className="w-full px-4 py-3.5 bg-white border border-[#e5e5e7] rounded-[14px] text-[15px] text-[#1d1d1d] placeholder-[#b0b0b5] focus:border-[#007aff] focus:outline-none transition-colors resize-none"
+                  className="w-full px-4 py-3 bg-white border border-[#e5e5e7] rounded-[12px] text-[15px] text-[#1d1d1d] placeholder-[#b0b0b5] focus:border-[#007aff] focus:outline-none transition-colors resize-none"
                 />
               </div>
               
-              {/* Mood */}
-              <div className="pt-3">
-                <label className="block text-[13px] font-medium text-[#1d1d1d] mb-4 text-center">
+              {/* Mood picker */}
+              <div className="py-2">
+                <label className="block text-[13px] font-medium text-[#1d1d1d] mb-3 text-center">
                   How was your week?
                 </label>
                 <div className="flex items-center justify-center gap-3">
@@ -319,61 +342,76 @@ export default function Home() {
                     <button
                       key={i}
                       onClick={() => setCurrentMood(i)}
-                      className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500 ${
+                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${
                         currentMood === i
                           ? 'bg-[#1d1d1d]'
                           : 'hover:bg-[#f0f0f0]'
                       }`}
                     >
-                      <MoodIcon level={i} />
+                      <MoodDot level={i} />
                     </button>
                   ))}
                 </div>
-                <p className="text-[12px] text-[#86868b] text-center mt-3">
+                <p className="text-[13px] text-[#86868b] text-center mt-3">
                   {moodLabels[currentMood]}
                 </p>
               </div>
               
+              {/* Save button */}
               <button
                 onClick={saveWeeklyEntry}
                 disabled={!currentHighlight && !currentChallenge && !currentGratitude}
-                className="w-full py-3.5 bg-[#1d1d1d] text-white text-[15px] font-medium rounded-[14px] hover:bg-[#333] disabled:opacity-40 disabled:cursor-not-allowed transition-all mt-2"
+                className="w-full py-3 bg-[#1d1d1d] text-white text-[15px] font-medium rounded-[12px] hover:bg-[#333] disabled:opacity-40 disabled:cursor-not-allowed transition-all mt-2"
               >
                 Save Entry
               </button>
             </div>
           </div>
           
-          {/* Success Message */}
+          {/* Success toast - minimal */}
           {showWeeklySuccess && (
-            <div className="bg-[#e8f5e9] border border-[#c8e6c9] rounded-[14px] px-4 py-3 mb-8 flex items-center gap-3 animate-fadeIn">
-              <span className="text-[16px]">✓</span>
-              <p className="text-[14px] font-medium text-[#2e7d32]">Entry saved. See you next week.</p>
+            <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-[#1d1d1d] text-white px-5 py-3 rounded-[12px] flex items-center gap-2 shadow-lg animate-fadeIn">
+              <Check size={16} />
+              <span className="text-[14px] font-medium">Entry saved</span>
             </div>
           )}
           
-          {/* History */}
-          {weeklyEntries.length > 0 && (
-            <div className="mb-8">
+          {/* History with pagination */}
+          {filteredWeekly.length > 0 && (
+            <div className="mt-10">
+              {/* Header with count */}
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-[17px] font-semibold text-[#1d1d1d]">
+                  Past Entries
+                </h3>
+                <span className="text-[13px] text-[#86868b]">
+                  {filteredWeekly.length} total
+                </span>
+              </div>
+              
               {/* Search */}
-              <div className="relative mb-6">
+              <div className="relative mb-4">
                 <input
                   type="text"
                   placeholder="Search..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full px-4 py-3 pl-10 bg-white border border-[#e5e5e7] rounded-[12px] text-[14px] text-[#1d1d1d] placeholder-[#b0b0b5] focus:border-[#007aff] focus:outline-none transition-colors"
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value)
+                    setWeeklyPage(1)
+                  }}
+                  className="w-full px-4 py-2.5 pl-10 bg-white border border-[#e5e5e7] rounded-[12px] text-[14px] text-[#1d1d1d] placeholder-[#b0b0b5] focus:border-[#007aff] focus:outline-none transition-colors"
                 />
                 <div className="absolute left-3.5 top-1/2 transform -translate-y-1/2">
-                  <div className="w-3.5 h-3.5 border-2 border-[#b0b0b5] rounded-full" />
+                  <div className="w-4 h-4 border-2 border-[#b0b0b5] rounded-full" />
                 </div>
               </div>
               
+              {/* Entries list */}
               <div className="space-y-3">
-                {filteredWeekly.map((entry) => (
+                {paginatedWeekly.map((entry) => (
                   <div 
                     key={entry.id}
-                    className="bg-white rounded-[18px] p-5 cursor-pointer hover:shadow-sm transition-all duration-500"
+                    className="bg-white rounded-[16px] p-4 cursor-pointer hover:bg-[#fafafa] transition-all duration-200"
                     onClick={() => setExpandedEntryId(expandedEntryId === entry.id ? null : entry.id)}
                   >
                     <div className="flex items-center justify-between mb-2">
@@ -382,7 +420,7 @@ export default function Home() {
                         <span className="text-[12px] text-[#86868b]">{formatDate(entry.date)}</span>
                       </div>
                       <div className="w-6 h-6 rounded-full flex items-center justify-center bg-[#f5f5f5]">
-                        <MoodIcon level={entry.mood} />
+                        <MoodDot level={entry.mood} />
                       </div>
                     </div>
                     
@@ -392,28 +430,29 @@ export default function Home() {
                       </p>
                     )}
                     
+                    {/* Expanded view */}
                     {expandedEntryId === entry.id && (
-                      <div className="mt-4 pt-4 border-t border-[#f0f0f0] space-y-3 animate-fadeIn">
+                      <div className="mt-3 pt-3 border-t border-[#f0f0f0] space-y-2">
                         {entry.highlight && (
                           <div>
-                            <p className="text-[11px] font-semibold text-[#86868b] uppercase tracking-wider mb-1">Highlight</p>
+                            <p className="text-[11px] font-medium text-[#86868b] uppercase">Highlight</p>
                             <p className="text-[14px] text-[#1d1d1d]">{entry.highlight}</p>
                           </div>
                         )}
                         {entry.challenge && (
                           <div>
-                            <p className="text-[11px] font-semibold text-[#86868b] uppercase tracking-wider mb-1">Challenging</p>
+                            <p className="text-[11px] font-medium text-[#86868b] uppercase">Challenging</p>
                             <p className="text-[14px] text-[#1d1d1d]">{entry.challenge}</p>
                           </div>
                         )}
                         {entry.gratitude && (
                           <div>
-                            <p className="text-[11px] font-semibold text-[#86868b] uppercase tracking-wider mb-1">Grateful</p>
+                            <p className="text-[11px] font-medium text-[#86868b] uppercase">Grateful</p>
                             <p className="text-[14px] text-[#1d1d1d]">{entry.gratitude}</p>
                           </div>
                         )}
                         <div className="flex items-center justify-between pt-2">
-                          <span className="text-[12px] text-[#86868b]">Mood: {moodLabels[entry.mood]}</span>
+                          <span className="text-[12px] text-[#86868b]">{moodLabels[entry.mood]}</span>
                           <button 
                             onClick={(e) => {
                               e.stopPropagation()
@@ -426,16 +465,32 @@ export default function Home() {
                         </div>
                       </div>
                     )}
-                    
-                    {!expandedEntryId && (entry.challenge || entry.gratitude) && (
-                      <div className="mt-2 text-[12px] text-[#86868b] flex items-center gap-1">
-                        <ChevronDown className="w-3.5 h-3.5" />
-                        <span>See more</span>
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>
+              
+              {/* Pagination */}
+              {weeklyTotalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 mt-6">
+                  <button
+                    onClick={() => setWeeklyPage(Math.max(1, weeklyPage - 1))}
+                    disabled={weeklyPage === 1}
+                    className="p-2 rounded-full hover:bg-[#f0f0f0] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                  >
+                    <ChevronLeft size={18} className="text-[#86868b]" />
+                  </button>
+                  <span className="text-[13px] text-[#86868b]">
+                    {weeklyPage} of {weeklyTotalPages}
+                  </span>
+                  <button
+                    onClick={() => setWeeklyPage(Math.min(weeklyTotalPages, weeklyPage + 1))}
+                    disabled={weeklyPage === weeklyTotalPages}
+                    className="p-2 rounded-full hover:bg-[#f0f0f0] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                  >
+                    <ChevronRight size={18} className="text-[#86868b]" />
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </main>
@@ -443,23 +498,18 @@ export default function Home() {
       
       {/* Mental Wellness Tab */}
       {activeTab === 'mental' && (
-        <main className="max-w-xl mx-auto px-8 pb-24 animate-fadeIn">
-          {/* Intro */}
-          <div className="mb-10">
-            <h2 className="text-[24px] font-light text-[#1d1d1d] mb-2">
+        <main className="max-w-lg mx-auto px-6 pb-24 animate-fadeIn">
+          <div className="mb-6">
+            <h2 className="text-[22px] font-semibold text-[#1d1d1d]">
               Mental Wellness
             </h2>
-            <p className="text-[15px] font-light text-[#86868b] leading-relaxed max-w-md">
-              A quiet space to process your thoughts and feelings. Everything stays private.
-            </p>
           </div>
           
-          {/* Form */}
-          <div className="mb-10">
-            <div className="space-y-5">
+          <div className="mb-8">
+            <div className="space-y-4">
               {/* Mood */}
-              <div>
-                <label className="block text-[13px] font-medium text-[#1d1d1d] mb-4 text-center">
+              <div className="py-2">
+                <label className="block text-[13px] font-medium text-[#1d1d1d] mb-3 text-center">
                   How are you feeling?
                 </label>
                 <div className="flex items-center justify-center gap-3">
@@ -467,24 +517,24 @@ export default function Home() {
                     <button
                       key={i}
                       onClick={() => setMentalMood(i)}
-                      className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500 ${
+                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${
                         mentalMood === i
                           ? 'bg-[#1d1d1d]'
                           : 'hover:bg-[#f0f0f0]'
                       }`}
                     >
-                      <MoodIcon level={i} />
+                      <MoodDot level={i} />
                     </button>
                   ))}
                 </div>
-                <p className="text-[12px] text-[#86868b] text-center mt-3">
+                <p className="text-[13px] text-[#86868b] text-center mt-3">
                   {moodLabels[mentalMood]}
                 </p>
               </div>
               
               {/* Thoughts */}
               <div>
-                <label className="block text-[13px] font-medium text-[#1d1d1d] mb-2.5">
+                <label className="block text-[13px] font-medium text-[#1d1d1d] mb-2">
                   What&apos;s on your mind?
                 </label>
                 <textarea
@@ -492,13 +542,13 @@ export default function Home() {
                   value={currentThoughts}
                   onChange={(e) => setCurrentThoughts(e.target.value)}
                   rows={4}
-                  className="w-full px-4 py-3.5 bg-white border border-[#e5e5e7] rounded-[14px] text-[15px] text-[#1d1d1d] placeholder-[#b0b0b5] focus:border-[#007aff] focus:outline-none transition-colors resize-none"
+                  className="w-full px-4 py-3 bg-white border border-[#e5e5e7] rounded-[12px] text-[15px] text-[#1d1d1d] placeholder-[#b0b0b5] focus:border-[#007aff] focus:outline-none transition-colors resize-none"
                 />
               </div>
               
               {/* Triggers */}
               <div>
-                <label className="block text-[13px] font-medium text-[#1d1d1d] mb-2.5">
+                <label className="block text-[13px] font-medium text-[#1d1d1d] mb-2">
                   Any triggers or stressors?
                 </label>
                 <textarea
@@ -506,13 +556,13 @@ export default function Home() {
                   value={currentTriggers}
                   onChange={(e) => setCurrentTriggers(e.target.value)}
                   rows={3}
-                  className="w-full px-4 py-3.5 bg-white border border-[#e5e5e7] rounded-[14px] text-[15px] text-[#1d1d1d] placeholder-[#b0b0b5] focus:border-[#007aff] focus:outline-none transition-colors resize-none"
+                  className="w-full px-4 py-3 bg-white border border-[#e5e5e7] rounded-[12px] text-[15px] text-[#1d1d1d] placeholder-[#b0b0b5] focus:border-[#007aff] focus:outline-none transition-colors resize-none"
                 />
               </div>
               
               {/* Coping */}
               <div>
-                <label className="block text-[13px] font-medium text-[#1d1d1d] mb-2.5">
+                <label className="block text-[13px] font-medium text-[#1d1d1d] mb-2">
                   What helps?
                 </label>
                 <textarea
@@ -520,56 +570,67 @@ export default function Home() {
                   value={currentCoping}
                   onChange={(e) => setCurrentCoping(e.target.value)}
                   rows={3}
-                  className="w-full px-4 py-3.5 bg-white border border-[#e5e5e7] rounded-[14px] text-[15px] text-[#1d1d1d] placeholder-[#b0b0b5] focus:border-[#007aff] focus:outline-none transition-colors resize-none"
+                  className="w-full px-4 py-3 bg-white border border-[#e5e5e7] rounded-[12px] text-[15px] text-[#1d1d1d] placeholder-[#b0b0b5] focus:border-[#007aff] focus:outline-none transition-colors resize-none"
                 />
               </div>
               
               <button
                 onClick={saveMentalEntry}
                 disabled={!currentThoughts && !currentTriggers && !currentCoping}
-                className="w-full py-3.5 bg-[#1d1d1d] text-white text-[15px] font-medium rounded-[14px] hover:bg-[#333] disabled:opacity-40 disabled:cursor-not-allowed transition-all mt-2"
+                className="w-full py-3 bg-[#1d1d1d] text-white text-[15px] font-medium rounded-[12px] hover:bg-[#333] disabled:opacity-40 disabled:cursor-not-allowed transition-all mt-2"
               >
                 Save Entry
               </button>
             </div>
           </div>
           
-          {/* Success Message */}
+          {/* Success toast */}
           {showMentalSuccess && (
-            <div className="bg-[#e8f5e9] border border-[#c8e6c9] rounded-[14px] px-4 py-3 mb-8 flex items-center gap-3 animate-fadeIn">
-              <span className="text-[16px]">✓</span>
-              <p className="text-[14px] font-medium text-[#2e7d32]">Entry saved. Thank you for checking in.</p>
+            <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-[#1d1d1d] text-white px-5 py-3 rounded-[12px] flex items-center gap-2 shadow-lg animate-fadeIn">
+              <Check size={16} />
+              <span className="text-[14px] font-medium">Entry saved</span>
             </div>
           )}
           
-          {/* History */}
-          {mentalEntries.length > 0 && (
-            <div className="mb-8">
-              {/* Search */}
-              <div className="relative mb-6">
+          {/* History with pagination */}
+          {filteredMental.length > 0 && (
+            <div className="mt-10">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-[17px] font-semibold text-[#1d1d1d]">
+                  Past Entries
+                </h3>
+                <span className="text-[13px] text-[#86868b]">
+                  {filteredMental.length} total
+                </span>
+              </div>
+              
+              <div className="relative mb-4">
                 <input
                   type="text"
                   placeholder="Search..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full px-4 py-3 pl-10 bg-white border border-[#e5e5e7] rounded-[12px] text-[14px] text-[#1d1d1d] placeholder-[#b0b0b5] focus:border-[#007aff] focus:outline-none transition-colors"
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value)
+                    setMentalPage(1)
+                  }}
+                  className="w-full px-4 py-2.5 pl-10 bg-white border border-[#e5e5e7] rounded-[12px] text-[14px] text-[#1d1d1d] placeholder-[#b0b0b5] focus:border-[#007aff] focus:outline-none transition-colors"
                 />
                 <div className="absolute left-3.5 top-1/2 transform -translate-y-1/2">
-                  <div className="w-3.5 h-3.5 border-2 border-[#b0b0b5] rounded-full" />
+                  <div className="w-4 h-4 border-2 border-[#b0b0b5] rounded-full" />
                 </div>
               </div>
               
               <div className="space-y-3">
-                {filteredMental.map((entry) => (
+                {paginatedMental.map((entry) => (
                   <div 
                     key={entry.id}
-                    className="bg-white rounded-[18px] p-5 cursor-pointer hover:shadow-sm transition-all duration-500"
+                    className="bg-white rounded-[16px] p-4 cursor-pointer hover:bg-[#fafafa] transition-all duration-200"
                     onClick={() => setExpandedMentalId(expandedMentalId === entry.id ? null : entry.id)}
                   >
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-[12px] text-[#86868b]">{formatDate(entry.date)}</span>
                       <div className="w-6 h-6 rounded-full flex items-center justify-center bg-[#f5f5f5]">
-                        <MoodIcon level={entry.mood} />
+                        <MoodDot level={entry.mood} />
                       </div>
                     </div>
                     
@@ -580,27 +641,27 @@ export default function Home() {
                     )}
                     
                     {expandedMentalId === entry.id && (
-                      <div className="mt-4 pt-4 border-t border-[#f0f0f0] space-y-3 animate-fadeIn">
+                      <div className="mt-3 pt-3 border-t border-[#f0f0f0] space-y-2">
                         {entry.thoughts && (
                           <div>
-                            <p className="text-[11px] font-semibold text-[#86868b] uppercase tracking-wider mb-1">On My Mind</p>
+                            <p className="text-[11px] font-medium text-[#86868b] uppercase">On My Mind</p>
                             <p className="text-[14px] text-[#1d1d1d]">{entry.thoughts}</p>
                           </div>
                         )}
                         {entry.triggers && (
                           <div>
-                            <p className="text-[11px] font-semibold text-[#86868b] uppercase tracking-wider mb-1">Triggers</p>
+                            <p className="text-[11px] font-medium text-[#86868b] uppercase">Triggers</p>
                             <p className="text-[14px] text-[#1d1d1d]">{entry.triggers}</p>
                           </div>
                         )}
                         {entry.coping && (
                           <div>
-                            <p className="text-[11px] font-semibold text-[#86868b] uppercase tracking-wider mb-1">What Helps</p>
+                            <p className="text-[11px] font-medium text-[#86868b] uppercase">What Helps</p>
                             <p className="text-[14px] text-[#1d1d1d]">{entry.coping}</p>
                           </div>
                         )}
                         <div className="flex items-center justify-between pt-2">
-                          <span className="text-[12px] text-[#86868b]">Mood: {moodLabels[entry.mood]}</span>
+                          <span className="text-[12px] text-[#86868b]">{moodLabels[entry.mood]}</span>
                           <button 
                             onClick={(e) => {
                               e.stopPropagation()
@@ -613,33 +674,48 @@ export default function Home() {
                         </div>
                       </div>
                     )}
-                    
-                    {!expandedMentalId && (entry.triggers || entry.coping) && (
-                      <div className="mt-2 text-[12px] text-[#86868b] flex items-center gap-1">
-                        <ChevronDown className="w-3.5 h-3.5" />
-                        <span>See more</span>
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>
+              
+              {mentalTotalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 mt-6">
+                  <button
+                    onClick={() => setMentalPage(Math.max(1, mentalPage - 1))}
+                    disabled={mentalPage === 1}
+                    className="p-2 rounded-full hover:bg-[#f0f0f0] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                  >
+                    <ChevronLeft size={18} className="text-[#86868b]" />
+                  </button>
+                  <span className="text-[13px] text-[#86868b]">
+                    {mentalPage} of {mentalTotalPages}
+                  </span>
+                  <button
+                    onClick={() => setMentalPage(Math.min(mentalTotalPages, mentalPage + 1))}
+                    disabled={mentalPage === mentalTotalPages}
+                    className="p-2 rounded-full hover:bg-[#f0f0f0] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                  >
+                    <ChevronRight size={18} className="text-[#86868b]" />
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </main>
       )}
       
       {/* Footer */}
-      <footer className="max-w-xl mx-auto px-8 py-10">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+      <footer className="max-w-lg mx-auto px-6 py-8">
+        <div className="flex items-center justify-between">
           <p className="text-[12px] text-[#b0b0b5]">
-            WeeklyMind © 2026 • 100% private
+            WeeklyMind © 2026
           </p>
           <button 
             onClick={exportData}
-            className="text-[12px] text-[#86868b] hover:text-[#1d1d1d] flex items-center gap-2 px-4 py-2 rounded-full hover:bg-[#e8e8ed] transition-colors"
+            className="text-[12px] text-[#86868b] hover:text-[#1d1d1d] flex items-center gap-1.5 px-3 py-1.5 rounded-full hover:bg-[#e8e8ed] transition-all"
           >
-            <Download className="w-4 h-4" />
-            Export Data
+            <Download size={14} />
+            Export
           </button>
         </div>
       </footer>
