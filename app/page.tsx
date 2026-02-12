@@ -6,8 +6,9 @@ import {
   Brain,
   ChevronDown,
   Download,
-  Sparkles,
-  Heart
+  Heart,
+  Circle,
+  CircleDot
 } from 'lucide-react'
 
 type Tab = 'weekly' | 'mental'
@@ -33,9 +34,41 @@ interface MentalEntry {
   coping: string
 }
 
-const moodEmojis = ['😔', '😕', '😐', '🙂', '😊']
-const anxietyLabels = ['Calm', 'Mild', 'Moderate', 'High', 'Overwhelmed']
-const energyLabels = ['Drained', 'Low', 'Moderate', 'Good', 'Energized']
+// Custom mood icons - Apple SF Symbols style
+const MoodIcon = ({ level }: { level: number }) => {
+  // 0=low, 1=low-mid, 2=mid, 3=mid-high, 4=high
+  const colors = ['#9ca3af', '#9ca3af', '#6b7280', '#6b7280', '#1a1a1a']
+  const sizes = [20, 22, 24, 26, 28]
+  
+  if (level <= 1) {
+    return (
+      <Circle 
+        size={sizes[level]} 
+        strokeWidth={2} 
+        className="transition-all duration-500"
+        style={{ color: colors[level], opacity: 0.5 + level * 0.15 }}
+      />
+    )
+  }
+  if (level === 2) {
+    return (
+      <Circle 
+        size={24} 
+        strokeWidth={2} 
+        className="transition-all duration-500"
+        style={{ color: '#6b7280' }}
+      />
+    )
+  }
+  return (
+    <CircleDot 
+      size={sizes[level]} 
+      strokeWidth={2}
+      className="transition-all duration-500"
+      style={{ color: colors[level] }}
+    />
+  )
+}
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<Tab>('weekly')
@@ -51,7 +84,7 @@ export default function Home() {
   const [currentHighlight, setCurrentHighlight] = useState('')
   const [currentChallenge, setCurrentChallenge] = useState('')
   const [currentGratitude, setCurrentGratitude] = useState('')
-  const [currentMood, setCurrentMood] = useState(2) // 0-4 index
+  const [currentMood, setCurrentMood] = useState(2)
   const [showWeeklySuccess, setShowWeeklySuccess] = useState(false)
   const [expandedEntryId, setExpandedEntryId] = useState<string | null>(null)
   
@@ -153,8 +186,6 @@ export default function Home() {
     }
   }
   
-  const getMoodEmoji = (mood: number) => moodEmojis[mood]
-  
   const exportData = () => {
     const data = {
       weekly: weeklyEntries,
@@ -180,37 +211,39 @@ export default function Home() {
     e.thoughts.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
+  const moodLabels = ['Tough', 'Difficult', 'Okay', 'Good', 'Great']
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f8f9fa] via-[#fafbfc] to-[#f5f7f9]">
+    <div className="min-h-screen bg-gradient-to-br from-[#fafafa] via-[#fafafa] to-[#f5f5f5]">
       {/* Header */}
-      <header className="pt-14 pb-8 px-8 max-w-2xl mx-auto">
-        <h1 className="text-[52px] font-light tracking-tight text-[#1a1a1a] mb-1">
+      <header className="pt-16 pb-8 px-8 max-w-xl mx-auto">
+        <h1 className="text-[48px] font-light tracking-tight text-[#1d1d1d] mb-1">
           WeeklyMind
         </h1>
-        <p className="text-[18px] font-light text-[#8e8e93]">
+        <p className="text-[16px] font-light text-[#86868b]">
           Your private wellness space
         </p>
       </header>
       
       {/* Tabs */}
-      <div className="max-w-2xl mx-auto px-8 mb-12">
-        <div className="flex gap-0.5 bg-[#e8e8ea] p-0.5 rounded-full w-fit">
+      <div className="max-w-xl mx-auto px-8 mb-12">
+        <div className="flex gap-0.5 bg-[#e8e8ed] p-0.5 rounded-full w-fit">
           <button
             onClick={() => switchTab('weekly')}
-            className={`px-8 py-2.5 rounded-full text-[15px] font-medium transition-all duration-500 ${
+            className={`px-7 py-2 rounded-full text-[14px] font-medium transition-all duration-500 ${
               activeTab === 'weekly' 
-                ? 'bg-white text-[#1a1a1a] shadow-sm' 
-                : 'text-[#8e8e93] hover:text-[#1a1a1a]'
+                ? 'bg-white text-[#1d1d1d] shadow-sm' 
+                : 'text-[#86868b] hover:text-[#1d1d1d]'
             }`}
           >
             Weekly
           </button>
           <button
             onClick={() => switchTab('mental')}
-            className={`px-8 py-2.5 rounded-full text-[15px] font-medium transition-all duration-500 ${
+            className={`px-7 py-2 rounded-full text-[14px] font-medium transition-all duration-500 ${
               activeTab === 'mental' 
-                ? 'bg-white text-[#1a1a1a] shadow-sm' 
-                : 'text-[#8e8e93] hover:text-[#1a1a1a]'
+                ? 'bg-white text-[#1d1d1d] shadow-sm' 
+                : 'text-[#86868b] hover:text-[#1d1d1d]'
             }`}
           >
             Wellness
@@ -220,23 +253,23 @@ export default function Home() {
       
       {/* Weekly Tab */}
       {activeTab === 'weekly' && (
-        <main className="max-w-2xl mx-auto px-8 pb-24 animate-fadeIn">
+        <main className="max-w-xl mx-auto px-8 pb-24 animate-fadeIn">
           {/* Intro */}
-          <div className="mb-8">
-            <h2 className="text-[28px] font-light text-[#1a1a1a] mb-2">
+          <div className="mb-10">
+            <h2 className="text-[24px] font-light text-[#1d1d1d] mb-2">
               Weekly Check-in
             </h2>
-            <p className="text-[16px] font-light text-[#8e8e93] leading-relaxed max-w-lg">
+            <p className="text-[15px] font-light text-[#86868b] leading-relaxed max-w-md">
               Take a moment to reflect on your week. Three simple questions to help you pause and notice what mattered.
             </p>
           </div>
           
           {/* Form */}
           <div className="mb-10">
-            <div className="space-y-6">
+            <div className="space-y-5">
               {/* Highlight */}
               <div>
-                <label className="block text-[14px] font-medium text-[#1a1a1a] mb-3">
+                <label className="block text-[13px] font-medium text-[#1d1d1d] mb-2.5">
                   What was your highlight?
                 </label>
                 <textarea
@@ -244,13 +277,13 @@ export default function Home() {
                   value={currentHighlight}
                   onChange={(e) => setCurrentHighlight(e.target.value)}
                   rows={3}
-                  className="w-full px-5 py-4 bg-white border border-[#e5e5e7] rounded-[16px] text-[16px] text-[#1a1a1a] placeholder-[#b0b0b5] focus:border-[#007aff] focus:outline-none transition-colors resize-none"
+                  className="w-full px-4 py-3.5 bg-white border border-[#e5e5e7] rounded-[14px] text-[15px] text-[#1d1d1d] placeholder-[#b0b0b5] focus:border-[#007aff] focus:outline-none transition-colors resize-none"
                 />
               </div>
               
               {/* Challenge */}
               <div>
-                <label className="block text-[14px] font-medium text-[#1a1a1a] mb-3">
+                <label className="block text-[13px] font-medium text-[#1d1d1d] mb-2.5">
                   What was challenging?
                 </label>
                 <textarea
@@ -258,13 +291,13 @@ export default function Home() {
                   value={currentChallenge}
                   onChange={(e) => setCurrentChallenge(e.target.value)}
                   rows={3}
-                  className="w-full px-5 py-4 bg-white border border-[#e5e5e7] rounded-[16px] text-[16px] text-[#1a1a1a] placeholder-[#b0b0b5] focus:border-[#007aff] focus:outline-none transition-colors resize-none"
+                  className="w-full px-4 py-3.5 bg-white border border-[#e5e5e7] rounded-[14px] text-[15px] text-[#1d1d1d] placeholder-[#b0b0b5] focus:border-[#007aff] focus:outline-none transition-colors resize-none"
                 />
               </div>
               
               {/* Gratitude */}
               <div>
-                <label className="block text-[14px] font-medium text-[#1a1a1a] mb-3">
+                <label className="block text-[13px] font-medium text-[#1d1d1d] mb-2.5">
                   What are you grateful for?
                 </label>
                 <textarea
@@ -272,36 +305,39 @@ export default function Home() {
                   value={currentGratitude}
                   onChange={(e) => setCurrentGratitude(e.target.value)}
                   rows={3}
-                  className="w-full px-5 py-4 bg-white border border-[#e5e5e7] rounded-[16px] text-[16px] text-[#1a1a1a] placeholder-[#b0b0b5] focus:border-[#007aff] focus:outline-none transition-colors resize-none"
+                  className="w-full px-4 py-3.5 bg-white border border-[#e5e5e7] rounded-[14px] text-[15px] text-[#1d1d1d] placeholder-[#b0b0b5] focus:border-[#007aff] focus:outline-none transition-colors resize-none"
                 />
               </div>
               
               {/* Mood */}
-              <div className="pt-4">
-                <label className="block text-[14px] font-medium text-[#1a1a1a] mb-4 text-center">
+              <div className="pt-3">
+                <label className="block text-[13px] font-medium text-[#1d1d1d] mb-4 text-center">
                   How was your week?
                 </label>
-                <div className="flex items-center justify-center gap-4">
-                  {moodEmojis.map((emoji, i) => (
+                <div className="flex items-center justify-center gap-3">
+                  {[0, 1, 2, 3, 4].map((i) => (
                     <button
                       key={i}
                       onClick={() => setCurrentMood(i)}
-                      className={`w-14 h-14 rounded-full flex items-center justify-center text-[28px] transition-all duration-500 ${
+                      className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500 ${
                         currentMood === i
-                          ? 'bg-[#f2f2f7] scale-110'
-                          : 'hover:bg-[#f5f5f7]'
+                          ? 'bg-[#1d1d1d]'
+                          : 'hover:bg-[#f0f0f0]'
                       }`}
                     >
-                      {emoji}
+                      <MoodIcon level={i} />
                     </button>
                   ))}
                 </div>
+                <p className="text-[12px] text-[#86868b] text-center mt-3">
+                  {moodLabels[currentMood]}
+                </p>
               </div>
               
               <button
                 onClick={saveWeeklyEntry}
                 disabled={!currentHighlight && !currentChallenge && !currentGratitude}
-                className="w-full py-4 bg-[#1a1a1a] text-white text-[16px] font-medium rounded-[16px] hover:bg-[#333] disabled:opacity-40 disabled:cursor-not-allowed transition-all mt-4"
+                className="w-full py-3.5 bg-[#1d1d1d] text-white text-[15px] font-medium rounded-[14px] hover:bg-[#333] disabled:opacity-40 disabled:cursor-not-allowed transition-all mt-2"
               >
                 Save Entry
               </button>
@@ -310,9 +346,9 @@ export default function Home() {
           
           {/* Success Message */}
           {showWeeklySuccess && (
-            <div className="bg-[#e8f5e9] border border-[#c8e6c9] rounded-[16px] p-4 mb-8 flex items-center gap-3 animate-fadeIn">
-              <span className="text-[20px]">✓</span>
-              <p className="text-[15px] font-medium text-[#2e7d32]">Entry saved. See you next week.</p>
+            <div className="bg-[#e8f5e9] border border-[#c8e6c9] rounded-[14px] px-4 py-3 mb-8 flex items-center gap-3 animate-fadeIn">
+              <span className="text-[16px]">✓</span>
+              <p className="text-[14px] font-medium text-[#2e7d32]">Entry saved. See you next week.</p>
             </div>
           )}
           
@@ -326,30 +362,32 @@ export default function Home() {
                   placeholder="Search..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full px-4 py-3 pl-10 bg-white border border-[#e5e5e7] rounded-[12px] text-[15px] text-[#1a1a1a] placeholder-[#b0b0b5] focus:border-[#007aff] focus:outline-none transition-colors"
+                  className="w-full px-4 py-3 pl-10 bg-white border border-[#e5e5e7] rounded-[12px] text-[14px] text-[#1d1d1d] placeholder-[#b0b0b5] focus:border-[#007aff] focus:outline-none transition-colors"
                 />
-                <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
-                  <div className="w-4 h-4 border-2 border-[#b0b0b5] rounded-full" />
+                <div className="absolute left-3.5 top-1/2 transform -translate-y-1/2">
+                  <div className="w-3.5 h-3.5 border-2 border-[#b0b0b5] rounded-full" />
                 </div>
               </div>
               
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {filteredWeekly.map((entry) => (
                   <div 
                     key={entry.id}
-                    className="bg-white rounded-[20px] p-6 cursor-pointer hover:shadow-sm transition-all duration-500"
+                    className="bg-white rounded-[18px] p-5 cursor-pointer hover:shadow-sm transition-all duration-500"
                     onClick={() => setExpandedEntryId(expandedEntryId === entry.id ? null : entry.id)}
                   >
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <span className="text-[14px] font-medium text-[#1a1a1a]">{entry.weekNumber}</span>
-                        <span className="text-[13px] text-[#8e8e93]">{formatDate(entry.date)}</span>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[13px] font-medium text-[#1d1d1d]">{entry.weekNumber}</span>
+                        <span className="text-[12px] text-[#86868b]">{formatDate(entry.date)}</span>
                       </div>
-                      <span className="text-[24px]">{getMoodEmoji(entry.mood)}</span>
+                      <div className="w-6 h-6 rounded-full flex items-center justify-center bg-[#f5f5f5]">
+                        <MoodIcon level={entry.mood} />
+                      </div>
                     </div>
                     
                     {entry.highlight && (
-                      <p className="text-[15px] text-[#1a1a1a] line-clamp-2">
+                      <p className="text-[14px] text-[#1d1d1d] line-clamp-2">
                         <span className="font-medium">Highlight:</span> {entry.highlight}
                       </p>
                     )}
@@ -358,30 +396,30 @@ export default function Home() {
                       <div className="mt-4 pt-4 border-t border-[#f0f0f0] space-y-3 animate-fadeIn">
                         {entry.highlight && (
                           <div>
-                            <p className="text-[12px] font-semibold text-[#8e8e93] uppercase tracking-wider mb-1">Highlight</p>
-                            <p className="text-[15px] text-[#1a1a1a]">{entry.highlight}</p>
+                            <p className="text-[11px] font-semibold text-[#86868b] uppercase tracking-wider mb-1">Highlight</p>
+                            <p className="text-[14px] text-[#1d1d1d]">{entry.highlight}</p>
                           </div>
                         )}
                         {entry.challenge && (
                           <div>
-                            <p className="text-[12px] font-semibold text-[#8e8e93] uppercase tracking-wider mb-1">Challenging</p>
-                            <p className="text-[15px] text-[#1a1a1a]">{entry.challenge}</p>
+                            <p className="text-[11px] font-semibold text-[#86868b] uppercase tracking-wider mb-1">Challenging</p>
+                            <p className="text-[14px] text-[#1d1d1d]">{entry.challenge}</p>
                           </div>
                         )}
                         {entry.gratitude && (
                           <div>
-                            <p className="text-[12px] font-semibold text-[#8e8e93] uppercase tracking-wider mb-1">Grateful</p>
-                            <p className="text-[15px] text-[#1a1a1a]">{entry.gratitude}</p>
+                            <p className="text-[11px] font-semibold text-[#86868b] uppercase tracking-wider mb-1">Grateful</p>
+                            <p className="text-[14px] text-[#1d1d1d]">{entry.gratitude}</p>
                           </div>
                         )}
                         <div className="flex items-center justify-between pt-2">
-                          <span className="text-[13px] text-[#8e8e93]">Mood: {getMoodEmoji(entry.mood)}</span>
+                          <span className="text-[12px] text-[#86868b]">Mood: {moodLabels[entry.mood]}</span>
                           <button 
                             onClick={(e) => {
                               e.stopPropagation()
                               deleteEntry(entry.id, 'weekly')
                             }}
-                            className="text-[13px] text-[#8e8e93] hover:text-[#ff3b30] transition-colors"
+                            className="text-[12px] text-[#86868b] hover:text-[#ff3b30] transition-colors"
                           >
                             Delete
                           </button>
@@ -390,8 +428,8 @@ export default function Home() {
                     )}
                     
                     {!expandedEntryId && (entry.challenge || entry.gratitude) && (
-                      <div className="mt-3 text-[13px] text-[#8e8e93] flex items-center gap-1">
-                        <ChevronDown className="w-4 h-4" />
+                      <div className="mt-2 text-[12px] text-[#86868b] flex items-center gap-1">
+                        <ChevronDown className="w-3.5 h-3.5" />
                         <span>See more</span>
                       </div>
                     )}
@@ -405,45 +443,48 @@ export default function Home() {
       
       {/* Mental Wellness Tab */}
       {activeTab === 'mental' && (
-        <main className="max-w-2xl mx-auto px-8 pb-24 animate-fadeIn">
+        <main className="max-w-xl mx-auto px-8 pb-24 animate-fadeIn">
           {/* Intro */}
-          <div className="mb-8">
-            <h2 className="text-[28px] font-light text-[#1a1a1a] mb-2">
+          <div className="mb-10">
+            <h2 className="text-[24px] font-light text-[#1d1d1d] mb-2">
               Mental Wellness
             </h2>
-            <p className="text-[16px] font-light text-[#8e8e93] leading-relaxed max-w-lg">
+            <p className="text-[15px] font-light text-[#86868b] leading-relaxed max-w-md">
               A quiet space to process your thoughts and feelings. Everything stays private.
             </p>
           </div>
           
           {/* Form */}
           <div className="mb-10">
-            <div className="space-y-6">
+            <div className="space-y-5">
               {/* Mood */}
               <div>
-                <label className="block text-[14px] font-medium text-[#1a1a1a] mb-4 text-center">
+                <label className="block text-[13px] font-medium text-[#1d1d1d] mb-4 text-center">
                   How are you feeling?
                 </label>
-                <div className="flex items-center justify-center gap-4">
-                  {moodEmojis.map((emoji, i) => (
+                <div className="flex items-center justify-center gap-3">
+                  {[0, 1, 2, 3, 4].map((i) => (
                     <button
                       key={i}
                       onClick={() => setMentalMood(i)}
-                      className={`w-14 h-14 rounded-full flex items-center justify-center text-[28px] transition-all duration-500 ${
+                      className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500 ${
                         mentalMood === i
-                          ? 'bg-[#f2f2f7] scale-110'
-                          : 'hover:bg-[#f5f5f7]'
+                          ? 'bg-[#1d1d1d]'
+                          : 'hover:bg-[#f0f0f0]'
                       }`}
                     >
-                      {emoji}
+                      <MoodIcon level={i} />
                     </button>
                   ))}
                 </div>
+                <p className="text-[12px] text-[#86868b] text-center mt-3">
+                  {moodLabels[mentalMood]}
+                </p>
               </div>
               
               {/* Thoughts */}
               <div>
-                <label className="block text-[14px] font-medium text-[#1a1a1a] mb-3">
+                <label className="block text-[13px] font-medium text-[#1d1d1d] mb-2.5">
                   What&apos;s on your mind?
                 </label>
                 <textarea
@@ -451,13 +492,13 @@ export default function Home() {
                   value={currentThoughts}
                   onChange={(e) => setCurrentThoughts(e.target.value)}
                   rows={4}
-                  className="w-full px-5 py-4 bg-white border border-[#e5e5e7] rounded-[16px] text-[16px] text-[#1a1a1a] placeholder-[#b0b0b5] focus:border-[#007aff] focus:outline-none transition-colors resize-none"
+                  className="w-full px-4 py-3.5 bg-white border border-[#e5e5e7] rounded-[14px] text-[15px] text-[#1d1d1d] placeholder-[#b0b0b5] focus:border-[#007aff] focus:outline-none transition-colors resize-none"
                 />
               </div>
               
               {/* Triggers */}
               <div>
-                <label className="block text-[14px] font-medium text-[#1a1a1a] mb-3">
+                <label className="block text-[13px] font-medium text-[#1d1d1d] mb-2.5">
                   Any triggers or stressors?
                 </label>
                 <textarea
@@ -465,13 +506,13 @@ export default function Home() {
                   value={currentTriggers}
                   onChange={(e) => setCurrentTriggers(e.target.value)}
                   rows={3}
-                  className="w-full px-5 py-4 bg-white border border-[#e5e5e7] rounded-[16px] text-[16px] text-[#1a1a1a] placeholder-[#b0b0b5] focus:border-[#007aff] focus:outline-none transition-colors resize-none"
+                  className="w-full px-4 py-3.5 bg-white border border-[#e5e5e7] rounded-[14px] text-[15px] text-[#1d1d1d] placeholder-[#b0b0b5] focus:border-[#007aff] focus:outline-none transition-colors resize-none"
                 />
               </div>
               
               {/* Coping */}
               <div>
-                <label className="block text-[14px] font-medium text-[#1a1a1a] mb-3">
+                <label className="block text-[13px] font-medium text-[#1d1d1d] mb-2.5">
                   What helps?
                 </label>
                 <textarea
@@ -479,14 +520,14 @@ export default function Home() {
                   value={currentCoping}
                   onChange={(e) => setCurrentCoping(e.target.value)}
                   rows={3}
-                  className="w-full px-5 py-4 bg-white border border-[#e5e5e7] rounded-[16px] text-[16px] text-[#1a1a1a] placeholder-[#b0b0b5] focus:border-[#007aff] focus:outline-none transition-colors resize-none"
+                  className="w-full px-4 py-3.5 bg-white border border-[#e5e5e7] rounded-[14px] text-[15px] text-[#1d1d1d] placeholder-[#b0b0b5] focus:border-[#007aff] focus:outline-none transition-colors resize-none"
                 />
               </div>
               
               <button
                 onClick={saveMentalEntry}
                 disabled={!currentThoughts && !currentTriggers && !currentCoping}
-                className="w-full py-4 bg-[#1a1a1a] text-white text-[16px] font-medium rounded-[16px] hover:bg-[#333] disabled:opacity-40 disabled:cursor-not-allowed transition-all mt-4"
+                className="w-full py-3.5 bg-[#1d1d1d] text-white text-[15px] font-medium rounded-[14px] hover:bg-[#333] disabled:opacity-40 disabled:cursor-not-allowed transition-all mt-2"
               >
                 Save Entry
               </button>
@@ -495,9 +536,9 @@ export default function Home() {
           
           {/* Success Message */}
           {showMentalSuccess && (
-            <div className="bg-[#e8f5e9] border border-[#c8e6c9] rounded-[16px] p-4 mb-8 flex items-center gap-3 animate-fadeIn">
-              <span className="text-[20px]">✓</span>
-              <p className="text-[15px] font-medium text-[#2e7d32]">Entry saved. Thank you for checking in.</p>
+            <div className="bg-[#e8f5e9] border border-[#c8e6c9] rounded-[14px] px-4 py-3 mb-8 flex items-center gap-3 animate-fadeIn">
+              <span className="text-[16px]">✓</span>
+              <p className="text-[14px] font-medium text-[#2e7d32]">Entry saved. Thank you for checking in.</p>
             </div>
           )}
           
@@ -511,27 +552,29 @@ export default function Home() {
                   placeholder="Search..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full px-4 py-3 pl-10 bg-white border border-[#e5e5e7] rounded-[12px] text-[15px] text-[#1a1a1a] placeholder-[#b0b0b5] focus:border-[#007aff] focus:outline-none transition-colors"
+                  className="w-full px-4 py-3 pl-10 bg-white border border-[#e5e5e7] rounded-[12px] text-[14px] text-[#1d1d1d] placeholder-[#b0b0b5] focus:border-[#007aff] focus:outline-none transition-colors"
                 />
-                <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
-                  <div className="w-4 h-4 border-2 border-[#b0b0b5] rounded-full" />
+                <div className="absolute left-3.5 top-1/2 transform -translate-y-1/2">
+                  <div className="w-3.5 h-3.5 border-2 border-[#b0b0b5] rounded-full" />
                 </div>
               </div>
               
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {filteredMental.map((entry) => (
                   <div 
                     key={entry.id}
-                    className="bg-white rounded-[20px] p-6 cursor-pointer hover:shadow-sm transition-all duration-500"
+                    className="bg-white rounded-[18px] p-5 cursor-pointer hover:shadow-sm transition-all duration-500"
                     onClick={() => setExpandedMentalId(expandedMentalId === entry.id ? null : entry.id)}
                   >
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-[13px] text-[#8e8e93]">{formatDate(entry.date)}</span>
-                      <span className="text-[24px]">{getMoodEmoji(entry.mood)}</span>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[12px] text-[#86868b]">{formatDate(entry.date)}</span>
+                      <div className="w-6 h-6 rounded-full flex items-center justify-center bg-[#f5f5f5]">
+                        <MoodIcon level={entry.mood} />
+                      </div>
                     </div>
                     
                     {entry.thoughts && (
-                      <p className="text-[15px] text-[#1a1a1a] line-clamp-2">
+                      <p className="text-[14px] text-[#1d1d1d] line-clamp-2">
                         {entry.thoughts}
                       </p>
                     )}
@@ -540,30 +583,30 @@ export default function Home() {
                       <div className="mt-4 pt-4 border-t border-[#f0f0f0] space-y-3 animate-fadeIn">
                         {entry.thoughts && (
                           <div>
-                            <p className="text-[12px] font-semibold text-[#8e8e93] uppercase tracking-wider mb-1">On My Mind</p>
-                            <p className="text-[15px] text-[#1a1a1a]">{entry.thoughts}</p>
+                            <p className="text-[11px] font-semibold text-[#86868b] uppercase tracking-wider mb-1">On My Mind</p>
+                            <p className="text-[14px] text-[#1d1d1d]">{entry.thoughts}</p>
                           </div>
                         )}
                         {entry.triggers && (
                           <div>
-                            <p className="text-[12px] font-semibold text-[#8e8e93] uppercase tracking-wider mb-1">Triggers</p>
-                            <p className="text-[15px] text-[#1a1a1a]">{entry.triggers}</p>
+                            <p className="text-[11px] font-semibold text-[#86868b] uppercase tracking-wider mb-1">Triggers</p>
+                            <p className="text-[14px] text-[#1d1d1d]">{entry.triggers}</p>
                           </div>
                         )}
                         {entry.coping && (
                           <div>
-                            <p className="text-[12px] font-semibold text-[#8e8e93] uppercase tracking-wider mb-1">What Helps</p>
-                            <p className="text-[15px] text-[#1a1a1a]">{entry.coping}</p>
+                            <p className="text-[11px] font-semibold text-[#86868b] uppercase tracking-wider mb-1">What Helps</p>
+                            <p className="text-[14px] text-[#1d1d1d]">{entry.coping}</p>
                           </div>
                         )}
                         <div className="flex items-center justify-between pt-2">
-                          <span className="text-[13px] text-[#8e8e93]">Mood: {getMoodEmoji(entry.mood)}</span>
+                          <span className="text-[12px] text-[#86868b]">Mood: {moodLabels[entry.mood]}</span>
                           <button 
                             onClick={(e) => {
                               e.stopPropagation()
                               deleteEntry(entry.id, 'mental')
                             }}
-                            className="text-[13px] text-[#8e8e93] hover:text-[#ff3b30] transition-colors"
+                            className="text-[12px] text-[#86868b] hover:text-[#ff3b30] transition-colors"
                           >
                             Delete
                           </button>
@@ -572,8 +615,8 @@ export default function Home() {
                     )}
                     
                     {!expandedMentalId && (entry.triggers || entry.coping) && (
-                      <div className="mt-3 text-[13px] text-[#8e8e93] flex items-center gap-1">
-                        <ChevronDown className="w-4 h-4" />
+                      <div className="mt-2 text-[12px] text-[#86868b] flex items-center gap-1">
+                        <ChevronDown className="w-3.5 h-3.5" />
                         <span>See more</span>
                       </div>
                     )}
@@ -586,14 +629,14 @@ export default function Home() {
       )}
       
       {/* Footer */}
-      <footer className="max-w-2xl mx-auto px-8 py-10">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-[13px] text-[#b0b0b5]">
+      <footer className="max-w-xl mx-auto px-8 py-10">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p className="text-[12px] text-[#b0b0b5]">
             WeeklyMind © 2026 • 100% private
           </p>
           <button 
             onClick={exportData}
-            className="text-[13px] text-[#8e8e93] hover:text-[#1a1a1a] flex items-center gap-2 px-4 py-2 rounded-full hover:bg-[#e8e8ea] transition-colors"
+            className="text-[12px] text-[#86868b] hover:text-[#1d1d1d] flex items-center gap-2 px-4 py-2 rounded-full hover:bg-[#e8e8ed] transition-colors"
           >
             <Download className="w-4 h-4" />
             Export Data
