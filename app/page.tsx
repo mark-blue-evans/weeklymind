@@ -494,11 +494,8 @@ export default function Home() {
                     setSearchQuery(e.target.value)
                     setWeeklyPage(1)
                   }}
-                  className="w-full px-4 py-2.5 pl-10 bg-white border border-[#e5e5e7] rounded-[12px] text-[14px] text-[#1d1d1d] placeholder-[#b0b0b5] focus:border-[#007aff] focus:outline-none transition-colors"
+                  className="w-full px-4 py-2.5 pl-4 bg-white border border-[#e5e5e7] rounded-[12px] text-[14px] text-[#1d1d1d] placeholder-[#b0b0b5] focus:border-[#007aff] focus:outline-none transition-colors"
                 />
-                <div className="absolute left-3.5 top-1/2 transform -translate-y-1/2">
-                  <div className="w-4 h-4 border-2 border-[#b0b0b5] rounded-full" />
-                </div>
               </div>
               
               {/* Entries list */}
@@ -708,11 +705,8 @@ export default function Home() {
                     setSearchQuery(e.target.value)
                     setMentalPage(1)
                   }}
-                  className="w-full px-4 py-2.5 pl-10 bg-white border border-[#e5e5e7] rounded-[12px] text-[14px] text-[#1d1d1d] placeholder-[#b0b0b5] focus:border-[#007aff] focus:outline-none transition-colors"
+                  className="w-full px-4 py-2.5 pl-4 bg-white border border-[#e5e5e7] rounded-[12px] text-[14px] text-[#1d1d1d] placeholder-[#b0b0b5] focus:border-[#007aff] focus:outline-none transition-colors"
                 />
-                <div className="absolute left-3.5 top-1/2 transform -translate-y-1/2">
-                  <div className="w-4 h-4 border-2 border-[#b0b0b5] rounded-full" />
-                </div>
               </div>
               
               <div className="space-y-3">
@@ -801,10 +795,7 @@ export default function Home() {
       
       {/* Footer */}
       <footer className="max-w-lg mx-auto px-6 py-8">
-        <div className="flex items-center justify-between">
-          <p className="text-[12px] text-[#b0b0b5]">
-            WeeklyMind © 2026
-          </p>
+        <div className="flex items-center justify-end">
           <div className="flex items-center gap-2">
             {/* Share Button */}
             <button 
